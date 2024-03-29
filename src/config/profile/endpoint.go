@@ -50,6 +50,7 @@ func (r endpointRegistry) Get(name string) (e Endpoint, err error) {
     for _, endpoint := range r.Endpoints {
        if endpoint.Name() == name {
             e = endpoint
+            break
        }
     }
 
