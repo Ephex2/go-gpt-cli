@@ -1,0 +1,399 @@
+package image
+
+import (
+	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"image"
+	"image/png"
+	"net/http"
+	"path/filepath"
+	"strings"
+
+	"io"
+	"os"
+	"strconv"
+	"sync"
+
+	"github.com/ephex2/go-gpt-cli/api"
+	"github.com/gabriel-vasile/mimetype"
+	"github.com/pborman/uuid"
+)
+
+const BaseImageRoute string = "/v1/images"
+const createImageRoute string = "/generations"
+const editImageRoute string = "/edits"
+const createVariationRoute string = "/variations"
+
+func CreateImage(filePath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+	msg := formatChat(prompt)
+
+	imageProfile, err := getDefaultProfile()
+	if err != nil {
+		return
+	}
+
+	imageProfile.CreateImageBody.Prompt = msg
+	reqBody, err := json.Marshal(imageProfile.CreateImageBody)
+	if err != nil {
+		return
+	}
+
+	route := BaseImageRoute + createImageRoute
+	buf, err := api.GenericRequest(nil, reqBody, route, "POST")
+	if err != nil {
+		return
+	}
+
+	var imageResponse CreateImageResponse
+	err = json.Unmarshal(buf, &imageResponse)
+	if err != nil {
+		return
+	}
+
+	ImagePaths, err = getImages(filePath, imageResponse, imageProfile.CreateImageBody.ResponseFormat)
+	return
+}
+
+func CreateDalle3Image(filePath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+	msg := formatChat(prompt)
+
+	imageProfile, err := getDefaultProfile()
+	if err != nil {
+		return
+	}
+
+	if imageProfile.CreateDalle3ImageBody.N != 1 {
+		err = errors.New("Dalle3 image profile specifies an n > 1 , which is not supported. N must be 1")
+		return
+	}
+
+	imageProfile.CreateDalle3ImageBody.Prompt = msg
+	reqBody, err := json.Marshal(imageProfile.CreateDalle3ImageBody)
+	if err != nil {
+		return
+	}
+
+	route := BaseImageRoute + createImageRoute
+	buf, err := api.GenericRequest(nil, reqBody, route, "POST")
+	if err != nil {
+		return
+	}
+
+	var imageResponse CreateImageResponse
+	err = json.Unmarshal(buf, &imageResponse)
+	if err != nil {
+		return
+	}
+
+	ImagePaths, err = getImages(filePath, imageResponse, imageProfile.CreateDalle3ImageBody.ResponseFormat)
+	return
+}
+
+func CreateEdit(filePath string, mask *os.File, prompt []string) (imagePaths []string, err error) {
+	imageProfile, err := getDefaultProfile()
+	if err != nil {
+		return
+	}
+
+	msg := formatChat(prompt)
+	if msg == "" {
+		err = errors.New("prompt provided is empty, please provide a non-empty prompt to the function CreateEdit")
+		return
+	}
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	size, err := getOpenAiSize(filePath)
+	if err != nil {
+		return
+	}
+
+	fieldMap := imageProfile.CreateEditBody
+	fieldMap["prompt"] = msg
+	fieldMap["size"] = size
+
+	details := []api.FileUploadDetails{
+		{
+			File:                f,
+			UploadFormFieldName: "image",
+		},
+	}
+
+	if mask != nil {
+		maskDetails := api.FileUploadDetails{
+			File:                mask,
+			UploadFormFieldName: "mask",
+		}
+
+		details = append(details, maskDetails)
+	}
+
+	route := BaseImageRoute + editImageRoute
+	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST")
+	if err != nil {
+		return
+	}
+
+	var imageResponse CreateImageResponse
+	err = json.Unmarshal(buf, &imageResponse)
+	if err != nil {
+		return
+	}
+
+	format := fieldMap["response_format"]
+	if format == "" {
+		format = "url"
+	}
+
+	imagePaths, err = getImages(filePath, imageResponse, format)
+
+	return
+}
+
+// Creates an image variation from the image provided at path filePath
+// Returns a list of the new image paths for the new image variations created.
+func CreateVariation(filePath string) (imagePaths []string, err error) {
+	imageProfile, err := getDefaultProfile()
+	if err != nil {
+		return
+	}
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	size, err := getOpenAiSize(filePath)
+	if err != nil {
+		return
+	}
+
+	fieldMap := imageProfile.CreateVariationBody
+	fieldMap["size"] = size
+
+	route := BaseImageRoute + createVariationRoute
+
+	details := []api.FileUploadDetails{
+		{
+			File:                f,
+			UploadFormFieldName: "image",
+		},
+	}
+
+	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST")
+	if err != nil {
+		return
+	}
+
+	var imageResponse CreateImageResponse
+	err = json.Unmarshal(buf, &imageResponse)
+	if err != nil {
+		return
+	}
+
+	format := fieldMap["response_format"]
+	if format == "" {
+		format = "url"
+	}
+
+	imagePaths, err = getImages(filePath, imageResponse, format)
+	return
+}
+
+// HELPER FUNCTIONS
+// TODO: Consider moving this to a utils lib ? It's been re-declared a few times now.
+func formatChat(chat []string) string {
+	var formattedChat string
+
+	for i, word := range chat {
+		if i+1 == len(chat) {
+			formattedChat += word
+		} else {
+			formattedChat += word + " "
+		}
+	}
+
+	return formattedChat
+}
+
+func getImages(filePath string, imageResponse CreateImageResponse, format string) (ImagePaths []string, err error) {
+	dir := filepath.Dir(filePath)
+
+	if dir == "." {
+		dir = ""
+	} else {
+		dir = dir + "/"
+	}
+
+	base := filepath.Base(filePath)
+
+	var wg sync.WaitGroup
+	mu := &sync.Mutex{}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer ctx.Done()
+	defer cancel()
+
+	for _, data := range imageResponse.Data {
+		wg.Add(1)
+		switch format {
+		case "url":
+			go func(url string) {
+				defer wg.Done()
+
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					uuidHyphen := uuid.NewRandom()
+					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+					actualPath := dir + uuid + base
+
+					e := downloadImage(url, actualPath, ctx)
+					if e != nil {
+						cancel()
+						err = e
+						return
+					}
+
+					mu.Lock()
+					ImagePaths = append(ImagePaths, actualPath)
+					mu.Unlock()
+				}
+			}(data.Url)
+		case "b64_json":
+			go func(b64json string) {
+				defer wg.Done()
+
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					buf, err := base64.StdEncoding.DecodeString(b64json)
+					if err != nil {
+						cancel()
+						return
+					}
+
+					uuidHyphen := uuid.NewRandom()
+					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+					actualPath := dir + uuid + base
+
+					jsonBuf, err := json.MarshalIndent(buf, "", "    ")
+					if err != nil {
+						cancel()
+						return
+					}
+
+					file, err := os.Create(actualPath)
+					if err != nil {
+						cancel()
+						return
+					}
+					defer file.Close()
+
+					_, err = io.Copy(file, bytes.NewReader(jsonBuf))
+					if err != nil {
+						cancel()
+						return
+					}
+				}
+			}(data.B64Json)
+		default:
+			cancel()
+			err = errors.New("response_format not supported. The response format provided is: " + format)
+			return
+		}
+
+		wg.Wait()
+	}
+
+	return
+}
+
+func downloadImage(url string, filePath string, ctx context.Context) (err error) {
+	r, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return
+	}
+
+	response, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func getOpenAiSize(filePath string) (size string, err error) {
+	// Adding register format here since it is only used here, may move it to an init() or Init() function
+	// At a later time. For now... KISS
+	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	img, _, err := image.DecodeConfig(f)
+	if err != nil {
+		return
+	}
+
+	size = strconv.Itoa(img.Width) + "x" + strconv.Itoa(img.Height)
+	return
+}
+
+func GetB64Encoding(imagePath string) (b64 string, err error) {
+	f, err := os.Open(imagePath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	m, err := mimetype.DetectFile(imagePath)
+	if err != nil {
+		return
+	}
+
+	switch m.String() {
+	case "image/jpeg":
+		b64 += "data:image/jpeg;base64,"
+	case "image/png":
+		b64 += "data:image/png;base64,"
+	case "image/webp":
+		b64 += "data:image/webp;base64,"
+	case "image/gif":
+		b64 += "data:image/gif;base64,"
+	default:
+		err = errors.New("mimetype of image not supported, it is: " + m.String())
+	}
+
+	buf, err := io.ReadAll(f)
+	if err != nil {
+		return
+	}
+
+	b64 += base64.StdEncoding.EncodeToString(buf)
+	return
+}
