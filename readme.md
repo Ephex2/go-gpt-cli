@@ -44,7 +44,7 @@ Example of endpoints are:
 - embeddings
 - and more
 
-Each endpoint which can be used to make calls to the API that provide parameters (e.g. model is excluded) will have an associated profile.
+Each endpoint which can be used to make calls to the API that require parameters (e.g. model is excluded) will have an associated profile.
 
 These profiles can be used to modify the values sent in a request to the api.
 

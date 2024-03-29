@@ -126,6 +126,9 @@ func (cr fileRepository) Create(endpoint profile.Endpoint, profileName string) (
 	}
 
 	err = config.SetDefaultProfile(endpoint.Name(), profileName, false)
+    if err != nil {
+        return
+    }
 
 	return
 }

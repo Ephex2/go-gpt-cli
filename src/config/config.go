@@ -68,14 +68,17 @@ func SetDefaultProfile(endpointName string, profileName string, force bool) (err
 		return
 	}
 
-	_, ok := RuntimeConfig.Settings[endpointName+"DefaultProfile"]
+	retrievedName, ok := RuntimeConfig.Settings[endpointName+"DefaultProfile"]
 
-	if !ok || force {
+	if !ok || force || retrievedName == "" {
 		RuntimeConfig.Settings[endpointName+"DefaultProfile"] = profileName
 		err = RuntimeConfig.Repository.Set(RuntimeConfig)
+		if err != nil {
+			return
+		}
 	}
 
-	return err
+	return
 }
 
 // Gets default profile, returns empty string if not found
