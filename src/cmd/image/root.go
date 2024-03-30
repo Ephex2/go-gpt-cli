@@ -18,38 +18,38 @@ var ImageCmd = &cobra.Command{
 
 var createCmd = &cobra.Command{
 	Use:     "create",
-	Short:   "Used to create images from a prompt. The first string provided will be the filepath for output. Other strings are the prompt.",
-	Long:    "Used to create images from an array of strings input. The first string is the filepath where the image will be written. Note that since multiple images can be generated per request to the API, this may return an array of paths.",
+	Short:   "Used to create images from a prompt.",
+	Long:    "Used to create images from an array of strings input. The first string is the folder path where the image will be written. Note that since multiple images can be generated per request to the API, this may return an array of paths.",
 	Run:     createFunc,
 	Args:    cobra.MinimumNArgs(2),
-	Example: "go-gpt-cli image create myimage.png Feel free to add as many strings as you like but 'put strings in quotes if you want them to be one element in the array'",
+	Example: "go-gpt-cli image create outputFolderPath 'image creation text prompt'",
 }
 
 var dalle3CreateCmd = &cobra.Command{
 	Use:     "dalle3create",
 	Short:   "Used to create images from a prompt using the dalle3 OpenAI model.",
-	Long:    "Used to create images from an array of strings input using the dalle3 OpenAI model. The first string is the filepath where the image will be written. Note that since multiple images can be generated per request to the API, this may return an array of paths.",
+	Long:    "Used to create images from an array of strings input using the dalle3 OpenAI model. The first string is the folder path where the image will be written. Note that since multiple images can be generated per request to the API, this may return an array of paths.",
 	Run:     dalle3CreateFunc,
 	Args:    cobra.MinimumNArgs(2),
-	Example: "go-gpt-cli image create myimage.png Feel free to add as many strings as you like but 'put strings in quotes if you want them to be one element in the array'",
+	Example: "go-gpt-cli image dalle3create outputFolderPath 'image creation text prompt'",
 }
 
 var editCmd = &cobra.Command{
 	Use:     "edit",
 	Short:   "Used to edit images from a given square image.",
-	Long:    "Used to edit images from a given square image. A mask can be provided whose transparent areas (alpha is zero) determine where the image should be edited. The image file must be square, less than 4MB, and square for the OpenAI API. Image size will be determined dynamically at runtime.",
+	Long:    "Used to edit images from a given square image. The first argument is the output folder path, the next is the path to the image to edit, the third is an optional path to a mask file, and the rest will be included a s aprompt to the API. A mask can be provided whose transparent areas (alpha is zero) determine where the image should be edited. The image file must be square, less than 4MB, and square for the OpenAI API. Image size will be determined dynamically at runtime.",
 	Run:     editFunc,
-	Args:    cobra.MinimumNArgs(2),
-	Example: "go-gpt-cli image edit myimage.png mymask.png 'A prompt describing the resulting edited images'",
+	Args:    cobra.MinimumNArgs(3),
+	Example: "go-gpt-cli image edit outputFolderPath myimage.png mymask.png 'A prompt describing the resulting edited images'",
 }
 
 var variationCmd = &cobra.Command{
 	Use:     "variation",
 	Short:   "Used to create image variations from a given square image.",
-	Long:    "Used to create image variations from a given square image. The image file must be square, less than 4MB, and square for the OpenAI API. Image size will be determined dynamically at runtime.",
+	Long:    "Used to create image variations from a given square image. The first argument is the output folder path, and the second one will be the image to create a variation for. The image file must be square, less than 4MB, and square for the OpenAI API. Image size will be determined dynamically at runtime.",
 	Run:     variationFunc,
-	Args:    cobra.ExactArgs(1),
-	Example: "go-gpt-cli image variation myimage.png",
+	Args:    cobra.ExactArgs(2),
+	Example: "go-gpt-cli image variation outputFolderPath myimage.png",
 }
 
 func Execute(cmd *cobra.Command, args []string) (err error) {
@@ -94,13 +94,16 @@ func editFunc(cmd *cobra.Command, args []string) {
 	var mask *os.File
 	mask = nil
 
-	// mask setup
-	if maskStat, err := os.Stat(args[1]); err == nil {
+    folderPath := args[0]
+    imagePath := args[1]
+    potentialMask := args[2] // third argument
+
+	if maskStat, err := os.Stat(potentialMask); err == nil {
 		if !maskStat.IsDir() {
-			t, err := mimetype.DetectFile(args[1])
+			t, err := mimetype.DetectFile(potentialMask)
 			if err == nil {
 				if t.Extension() == ".png" {
-					mask, err = os.Open(args[1])
+					mask, err = os.Open(potentialMask)
 					if err != nil {
 						mask = nil
 					}
@@ -111,17 +114,17 @@ func editFunc(cmd *cobra.Command, args []string) {
 
 	// prompt setup
 	if mask != nil {
-		if len(args) == 2 {
+		if len(args) == 3 {
 			log.Critical("Please provide a prompt for your image edit; only a base image and mask were found as arguments.\n")
 			os.Exit(1)
 		}
 
-		prompt = append(prompt, args[2:]...)
+		prompt = append(prompt, args[3:]...)
 	} else {
-		prompt = append(prompt, args[1:]...)
+		prompt = append(prompt, args[2:]...)
 	}
 
-	paths, err := image.CreateEdit(args[0], mask, prompt)
+	paths, err := image.CreateEdit(imagePath, mask, folderPath, prompt)
 	if err != nil {
 		log.Critical(err.Error() + "\n")
 		os.Exit(1)
@@ -131,7 +134,10 @@ func editFunc(cmd *cobra.Command, args []string) {
 }
 
 func variationFunc(cmd *cobra.Command, args []string) {
-	paths, err := image.CreateVariation(args[0])
+    folderPath := args[0]
+    filePath := args[1]
+
+	paths, err := image.CreateVariation(filePath, folderPath)
 	if err != nil {
 		log.Critical(err.Error() + "\n")
 		os.Exit(1)

@@ -30,22 +30,6 @@ var AllowedVoices = struct {
 	Shimmer: "shimmer",
 }
 
-var AllowedSpeechResponseFormats = struct {
-	Mp3  string
-	Opus string
-	Aac  string
-	Flac string
-	Wav  string
-	Pcm  string
-}{
-	Mp3:  "mp3",
-	Opus: "opus",
-	Aac:  "aac",
-	Flac: "flac",
-	Wav:  "wav",
-	Pcm:  "pcm",
-}
-
 // Exclude response_json as it is reserved for VerboseTranscriptionRequestBody
 var AllowedTranscriptionResponseFormats = struct {
 	Json string
@@ -153,8 +137,8 @@ type CreateSpeechBody struct {
 	Model          string  `json:"model"`
 	Input          string  `json:"input"`
 	Voice          string  `json:"voice"`
-	ResponseFormat string  `json:"response_format,omitempty"`
-	Speed          float64 `json:"speed,omitempty"`
+	ResponseFormat *string  `json:"response_format,omitempty"`
+	Speed          *float64 `json:"speed,omitempty"`
 }
 
 type CreateTranscriptionJsonResponse struct {
@@ -195,10 +179,13 @@ type Segment struct {
 }
 
 func DefaultCreateSpeechBody() CreateSpeechBody {
+    format := new(string)
+    *format = "mp3"
+
 	return CreateSpeechBody{
 		Model:          AllowedSpeecModels.TTS1,
 		Input:          "",
 		Voice:          AllowedVoices.Nova,
-		ResponseFormat: AllowedSpeechResponseFormats.Mp3,
+		ResponseFormat: format,
 	}
 }

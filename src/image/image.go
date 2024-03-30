@@ -27,7 +27,12 @@ const createImageRoute string = "/generations"
 const editImageRoute string = "/edits"
 const createVariationRoute string = "/variations"
 
-func CreateImage(filePath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+func CreateImage(folderPath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+    err = testFolderExists(folderPath)
+    if err != nil {
+        return
+    }
+
 	msg := formatChat(prompt)
 
 	imageProfile, err := getDefaultProfile()
@@ -53,11 +58,16 @@ func CreateImage(filePath string, prompt []string) (ImagePaths []string, revised
 		return
 	}
 
-	ImagePaths, err = getImages(filePath, imageResponse, imageProfile.CreateImageBody.ResponseFormat)
+	ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateImageBody.ResponseFormat)
 	return
 }
 
-func CreateDalle3Image(filePath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+func CreateDalle3Image(folderPath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
+    err = testFolderExists(folderPath)
+    if err != nil {
+        return
+    }
+
 	msg := formatChat(prompt)
 
 	imageProfile, err := getDefaultProfile()
@@ -65,7 +75,7 @@ func CreateDalle3Image(filePath string, prompt []string) (ImagePaths []string, r
 		return
 	}
 
-	if imageProfile.CreateDalle3ImageBody.N != 1 {
+	if *imageProfile.CreateDalle3ImageBody.N != 1 {
 		err = errors.New("Dalle3 image profile specifies an n > 1 , which is not supported. N must be 1")
 		return
 	}
@@ -88,11 +98,16 @@ func CreateDalle3Image(filePath string, prompt []string) (ImagePaths []string, r
 		return
 	}
 
-	ImagePaths, err = getImages(filePath, imageResponse, imageProfile.CreateDalle3ImageBody.ResponseFormat)
+	ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateDalle3ImageBody.ResponseFormat)
 	return
 }
 
-func CreateEdit(filePath string, mask *os.File, prompt []string) (imagePaths []string, err error) {
+func CreateEdit(filePath string, mask *os.File, folderPath string, prompt []string) (imagePaths []string, err error) {
+    err = testFolderExists(folderPath)
+    if err != nil {
+        return
+    }
+
 	imageProfile, err := getDefaultProfile()
 	if err != nil {
 		return
@@ -152,14 +167,19 @@ func CreateEdit(filePath string, mask *os.File, prompt []string) (imagePaths []s
 		format = "url"
 	}
 
-	imagePaths, err = getImages(filePath, imageResponse, format)
+	imagePaths, err = getImages(folderPath, imageResponse, format)
 
 	return
 }
 
 // Creates an image variation from the image provided at path filePath
 // Returns a list of the new image paths for the new image variations created.
-func CreateVariation(filePath string) (imagePaths []string, err error) {
+func CreateVariation(filePath string, folderPath string) (imagePaths []string, err error) {
+    err = testFolderExists(folderPath)
+    if err != nil {
+        return
+    }
+
 	imageProfile, err := getDefaultProfile()
 	if err != nil {
 		return
@@ -204,7 +224,7 @@ func CreateVariation(filePath string) (imagePaths []string, err error) {
 		format = "url"
 	}
 
-	imagePaths, err = getImages(filePath, imageResponse, format)
+	imagePaths, err = getImages(folderPath, imageResponse, format)
 	return
 }
 
@@ -224,17 +244,7 @@ func formatChat(chat []string) string {
 	return formattedChat
 }
 
-func getImages(filePath string, imageResponse CreateImageResponse, format string) (ImagePaths []string, err error) {
-	dir := filepath.Dir(filePath)
-
-	if dir == "." {
-		dir = ""
-	} else {
-		dir = dir + "/"
-	}
-
-	base := filepath.Base(filePath)
-
+func getImages(folderPath string, imageResponse CreateImageResponse, format string) (ImagePaths []string, err error) {
 	var wg sync.WaitGroup
 	mu := &sync.Mutex{}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -254,7 +264,17 @@ func getImages(filePath string, imageResponse CreateImageResponse, format string
 				default:
 					uuidHyphen := uuid.NewRandom()
 					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
-					actualPath := dir + uuid + base
+
+					// handle http:// and https:// -> remove them, leaving the 's' prepended on the string in the https case
+					// --> We will only be using these strings to get the extension of a file in a url
+					noProtocol := strings.Replace(url, "http", "", -1)
+					noSeparator := strings.Replace(noProtocol, "://", "", -1)
+                    noQueryParameteres := strings.Split(noSeparator, "?")
+
+					ext := filepath.Ext(noQueryParameteres[0])
+
+
+					actualPath := folderPath + "/" + uuid + ext
 
 					e := downloadImage(url, actualPath, ctx)
 					if e != nil {
@@ -284,13 +304,20 @@ func getImages(filePath string, imageResponse CreateImageResponse, format string
 
 					uuidHyphen := uuid.NewRandom()
 					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
-					actualPath := dir + uuid + base
 
 					jsonBuf, err := json.MarshalIndent(buf, "", "    ")
 					if err != nil {
 						cancel()
 						return
 					}
+
+					m := mimetype.Detect(jsonBuf)
+					if m.String() != "" {
+						err = errors.New("mimetype not retrieved from image")
+						return
+					}
+
+					actualPath := folderPath + "/" + uuid + m.Extension()
 
 					file, err := os.Create(actualPath)
 					if err != nil {
@@ -395,5 +422,20 @@ func GetB64Encoding(imagePath string) (b64 string, err error) {
 	}
 
 	b64 += base64.StdEncoding.EncodeToString(buf)
+	return
+}
+
+// Test folder exists + is folder
+func testFolderExists(folderPath string) (err error) {
+	stat, err := os.Stat(folderPath)
+	if err != nil {
+		return
+	}
+
+	if !stat.IsDir() {
+		err = errors.New("The path provided is not a dir. path: " + folderPath)
+		return
+	}
+
 	return
 }
