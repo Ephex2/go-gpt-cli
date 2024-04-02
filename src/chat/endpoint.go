@@ -20,8 +20,8 @@ func (ce chatEndpoint) Name() string {
 func (ce chatEndpoint) DefaultProfile() profile.Profile {
 	p := ChatProfile{
 		ProfileName:          "default",
-		CompletionBody:       GetDefaultBody(),
-		VisionCompletionBody: GetDefaultVisionBody(),
+		CreateCompletionBody:       GetDefaultBody(),
+		CreateVisionCompletionBody: GetDefaultVisionBody(),
 		MessageHistory:       false,
 	}
 

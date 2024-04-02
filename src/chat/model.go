@@ -7,29 +7,8 @@ var defaultSystemPrompt = Message{
 	Content: "You will be acting as an AI assistant. Your goal is to answer the user's requests in a detailed yet concise manner. Here are some important rules for the interaction:\n- Always respond in a neutral and professional tone.\n- If a coding question could use an example, it is ok to be more lenient on the need to be concise.",
 }
 
-// user default to pre-populate our client's desired default values
-// commented out request properties I plan not to use and that cannot have a good default value
-// might be a skill issue, but it is difficult in go for a property to not exist if not unmarshaled to.
-func GetDefaultBody() CompletionBody {
-	n := new(int)
-	*n = 1
-
-	b := CompletionBody{
-		Model:    "gpt-3.5-turbo",
-		Messages: []Message{},
-		N:        n,
-		ResponseFormat: &ResponseFormat{
-			Type: "text",
-		},
-		User: "go-gpt-cli",
-	}
-
-	b.Messages = append(b.Messages, defaultSystemPrompt)
-	return b
-}
-
 // Ref: https://platform.openai.com/docs/api-reference/chat/create
-type CompletionBody struct {
+type CreateCompletionBody struct {
 	Messages         []Message       `json:"messages"`
 	Model            string          `json:"model"`
 	FrequencyPenalty *float64        `json:"frequency_penalty,omitempty"`
@@ -93,29 +72,8 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-// Vision section
-func GetDefaultVisionBody() VisionCompletionBody {
-	n := new(int)
-	*n = 1
 
-	max := new(int)
-	*max = 300
-
-	b := VisionCompletionBody{
-		Model:     "gpt-4-vision-preview",
-		Messages:  []VisionMessage{},
-		MaxTokens: max,
-		N:         n,
-		ResponseFormat: &ResponseFormat{
-			Type: "text",
-		},
-		User: "go-gpt-cli",
-	}
-
-	return b
-}
-
-type VisionCompletionBody struct {
+type CreateVisionCompletionBody struct {
 	Messages         []VisionMessage `json:"messages"`
 	Model            string          `json:"model"`
 	FrequencyPenalty *float64        `json:"frequency_penalty,omitempty"`
@@ -149,4 +107,47 @@ type VisionContent struct {
 
 type ImageUrl struct {
 	Url string `json:"url"`
+}
+
+// user default to pre-populate our client's desired default values
+// commented out request properties I plan not to use and that cannot have a good default value
+// might be a skill issue, but it is difficult in go for a property to not exist if not unmarshaled to.
+func GetDefaultBody() CreateCompletionBody {
+	n := new(int)
+	*n = 1
+
+	b := CreateCompletionBody{
+		Model:    "gpt-3.5-turbo",
+		Messages: []Message{},
+		N:        n,
+		ResponseFormat: &ResponseFormat{
+			Type: "text",
+		},
+		User: "go-gpt-cli",
+	}
+
+	b.Messages = append(b.Messages, defaultSystemPrompt)
+	return b
+}
+
+// Vision section
+func GetDefaultVisionBody() CreateVisionCompletionBody {
+	n := new(int)
+	*n = 1
+
+	max := new(int)
+	*max = 300
+
+	b := CreateVisionCompletionBody{
+		Model:     "gpt-4-vision-preview",
+		Messages:  []VisionMessage{},
+		MaxTokens: max,
+		N:         n,
+		ResponseFormat: &ResponseFormat{
+			Type: "text",
+		},
+		User: "go-gpt-cli",
+	}
+
+	return b
 }

@@ -18,7 +18,7 @@ func (e finetuningEndpoint) Name() string {
 func (e finetuningEndpoint) DefaultProfile() profile.Profile {
 	p := FineTuningProfile{
 		ProfileName:           "default",
-		CreateFineTuneRequest: DefaultCreateFineTuneRequest(),
+		CreateFineTuneBody: DefaultCreateFineTuneBody(),
 	}
 
 	return p
@@ -27,7 +27,7 @@ func (e finetuningEndpoint) DefaultProfile() profile.Profile {
 func (e finetuningEndpoint) ProfileFromJsonBuf(buf []byte) (p profile.Profile, err error) {
 	var cProf FineTuningProfile
 	err = json.Unmarshal(buf, &cProf)
-	// if err != nil { return }
+	if err != nil { return }
 
 	p = cProf
 	return

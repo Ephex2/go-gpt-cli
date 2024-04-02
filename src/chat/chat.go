@@ -20,7 +20,7 @@ func CreateChatCompletion(prompt []string) (content string, err error) {
 		return
 	}
 
-	bufConfig, err := json.Marshal(chatProfile.CompletionBody)
+	bufConfig, err := json.Marshal(chatProfile.CreateCompletionBody)
 	if err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func CreateVisionChatCompletion(imagePath string, prompt []string) (resp string,
 		return
 	}
 
-	bufConfig, err := json.Marshal(p.VisionCompletionBody)
+	bufConfig, err := json.Marshal(p.CreateVisionCompletionBody)
 	if err != nil {
 		return
 	}
@@ -162,7 +162,7 @@ func postProcessing(res CompletionResponse, profile ChatProfile, messageType str
 			}
 
 		} else {
-			err = errors.New("no choices returned in response's CompletionBody for post-processing")
+			err = errors.New("no choices returned in response's CreateCompletionBody for post-processing")
 			return
 		}
 	}

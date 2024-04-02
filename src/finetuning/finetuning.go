@@ -164,15 +164,15 @@ func CreateJob(id string) (resp Job, err error) {
 		return
 	}
 
-	if id == "" && p.CreateFineTuneRequest.TrainingFile == "" {
+	if id == "" && p.CreateFineTuneBody.TrainingFile == "" {
 		err = errors.New("no training_file id provided in default profile, and no id provided to the function")
 		return
 	} else if id != "" {
 		// case where we override profile id with runtime id
-		p.CreateFineTuneRequest.TrainingFile = id
+		p.CreateFineTuneBody.TrainingFile = id
 	}
 
-	reqBuf, err := json.Marshal(p.CreateFineTuneRequest)
+	reqBuf, err := json.Marshal(p.CreateFineTuneBody)
 	if err != nil {
 		return
 	}

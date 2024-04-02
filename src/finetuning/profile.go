@@ -9,7 +9,7 @@ import (
 
 type FineTuningProfile struct {
 	ProfileName           string
-	CreateFineTuneRequest CreateFineTuneRequest
+	CreateFineTuneBody CreateFineTuneBody
 }
 
 func (p FineTuningProfile) Name() string {

@@ -11,8 +11,8 @@ import (
 
 type ChatProfile struct {
 	ProfileName          string
-	CompletionBody       CompletionBody
-	VisionCompletionBody VisionCompletionBody
+	CreateCompletionBody       CreateCompletionBody
+	CreateVisionCompletionBody CreateVisionCompletionBody
 	MessageHistory       bool
 }
 
@@ -38,7 +38,7 @@ func (c ChatProfile) Endpoint() profile.Endpoint {
 }
 
 func (c *ChatProfile) AddCompletionMessage(msg Message) (err error) {
-	c.CompletionBody.Messages = append(c.CompletionBody.Messages, msg)
+	c.CreateCompletionBody.Messages = append(c.CreateCompletionBody.Messages, msg)
 
 	if c.MessageHistory {
 		err = c.ProfileRepository().Update(c)
@@ -48,7 +48,7 @@ func (c *ChatProfile) AddCompletionMessage(msg Message) (err error) {
 }
 
 func (c *ChatProfile) AddVisionMessage(msg VisionMessage) (err error) {
-	c.VisionCompletionBody.Messages = append(c.VisionCompletionBody.Messages, msg)
+	c.CreateVisionCompletionBody.Messages = append(c.CreateVisionCompletionBody.Messages, msg)
 
 	if c.MessageHistory {
 		err = c.ProfileRepository().Update(c)
@@ -77,18 +77,18 @@ func (c *ChatProfile) ClearMessageHistory() (err error) {
 	}
 
 	var defaultSystemMessage []Message
-	for _, message := range c.CompletionBody.Messages {
+	for _, message := range c.CreateCompletionBody.Messages {
 		if strings.ToLower(message.Role) == "system" {
 			defaultSystemMessage = append(defaultSystemMessage, message)
 		}
 	}
 
-	if len(defaultSystemMessage) == len(c.CompletionBody.Messages) {
+	if len(defaultSystemMessage) == len(c.CreateCompletionBody.Messages) {
 		// nothing to do, return
 		return
 	}
 
-	c.CompletionBody.Messages = defaultSystemMessage
+	c.CreateCompletionBody.Messages = defaultSystemMessage
 	err = c.ProfileRepository().Update(c)
 	return
 }

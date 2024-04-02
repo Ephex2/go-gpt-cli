@@ -5,7 +5,7 @@ var defaultPaginationQueryParameters = map[string]string{
 	"limit": "20",
 }
 
-type CreateFineTuneRequest struct {
+type CreateFineTuneBody struct {
 	Model           string          `json:"model"`
 	TrainingFile    string          `json:"training_file"`
 	HyperParameters HyperParameters `json:"hyperparameters"`
@@ -61,8 +61,8 @@ type JobEventList struct {
 	HasMore bool       `json:"has_more"`
 }
 
-func DefaultCreateFineTuneRequest() CreateFineTuneRequest {
-	return CreateFineTuneRequest{
+func DefaultCreateFineTuneBody() CreateFineTuneBody {
+	return CreateFineTuneBody{
 		Model:           "gpt-3.5-turbo",
 		TrainingFile:    "", // empty training file IDs can be overwritten at runtime
 		HyperParameters: defaultHyperParameters(),
