@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/ephex2/go-gpt-cli/api"
+	"github.com/ephex2/go-gpt-cli/config"
 	"github.com/ephex2/go-gpt-cli/image"
 	"github.com/ephex2/go-gpt-cli/log"
 )
@@ -95,6 +96,29 @@ func CreateVisionChatCompletion(imagePath string, prompt []string) (resp string,
 
 	return
 }
+
+// Used to clear all historical messages when message history is enabled in the profile. Should have no effect when the chat profile does not support history,
+func ClearMessageHistory() (err error) {
+    chatProfile := ChatProfile{}
+
+	defaultProfileName, err := config.RuntimeConfig.GetDefaultProfile(chatProfile.Endpoint().Name())
+	if err != nil {
+		return
+	}
+
+	err = chatProfile.Load(defaultProfileName)
+	if err != nil {
+		return
+	}
+
+    err = chatProfile.ClearMessageHistory()
+	if err != nil {
+		return
+	}
+
+    return
+}
+
 
 func formatChat(chat []string) string {
 	var formattedChat string

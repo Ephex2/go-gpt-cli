@@ -14,6 +14,7 @@ var ChatCmd = &cobra.Command{
 	Short: "Allows you to make calls to the /v1/chat/ endpoint",
 }
 
+
 var promptCmd = &cobra.Command{
 	Use:     "prompt",
 	Short:   "Used to get a prompt from a chat completion, then create a .mp3 file using the audio create speech endpoint. *Reads the file over the speaker*",
@@ -21,6 +22,7 @@ var promptCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	Example: "go-gpt-cli chat prompt Feel free to add as many strings as you like but 'terminals will act best if you enclose your prompt in quotes'",
 }
+
 
 var visionCmd = &cobra.Command{
 	Use:     "vision",
@@ -31,6 +33,18 @@ var visionCmd = &cobra.Command{
 	Example: "go-gpt-cli chat vision ./myimage.png'terminals will act best if you enclose your prompt in quotes'",
 }
 
+
+var clearCmd = &cobra.Command{
+    Use: "clear",
+	Short:   "Used to clear all historical messages when message history is enabled in the profile.",
+	Long:   "Used to clear all historical messages when message history is enabled in the profile. Should have no effect when the chat profile does not support history",
+	Run:     clearFunc,
+	Args:    cobra.ExactArgs(0),
+	Example: "go-gpt-cli chat clear",
+    
+}
+
+
 func Execute(cmd *cobra.Command, args []string) (err error) {
 	if len(args) < 1 {
 		cmd.Help()
@@ -39,6 +53,7 @@ func Execute(cmd *cobra.Command, args []string) (err error) {
 	err = cmd.Execute()
 	return
 }
+
 
 func promptFunc(cmd *cobra.Command, args []string) {
 	s, err := chat.CreateChatCompletion(args)
@@ -50,6 +65,7 @@ func promptFunc(cmd *cobra.Command, args []string) {
 	fmt.Println(s)
 }
 
+
 func visionFunc(cmd *cobra.Command, args []string) {
 	s, err := chat.CreateVisionChatCompletion(args[0], args[1:])
 	if err != nil {
@@ -60,8 +76,19 @@ func visionFunc(cmd *cobra.Command, args []string) {
 	fmt.Println(s)
 }
 
+
+func clearFunc(cmd *cobra.Command, args []string) {
+    err := chat.ClearMessageHistory()
+    if err != nil {
+        log.Critical(err.Error() + "\n")
+        os.Exit(1)
+    }
+}
+
+
 func init() {
-	ChatCmd.AddCommand(promptCmd)
-	ChatCmd.AddCommand(visionCmd)
-	chat.Init()
+    ChatCmd.AddCommand(clearCmd)
+    ChatCmd.AddCommand(promptCmd)
+    ChatCmd.AddCommand(visionCmd)
+    chat.Init()
 }

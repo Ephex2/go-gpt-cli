@@ -22,7 +22,7 @@ func (ae audioEndpoint) DefaultProfile() profile.Profile {
 		CreateSpeechBody:               DefaultCreateSpeechBody(),
 		CreateTranscriptionBody:        CreateTranscriptionBody,
 		CreateVerboseTranscriptionBody: CreateVerboseTranscriptionBody,
-		CreateTranslationBody:          CreateTranlationBody,
+		CreateTranslationBody:          CreateTranslationBody,
 		CreateVerboseTranslationBody:   CreateVerboseTranslationBody,
 		SaveDirectory:                  "",
 	}

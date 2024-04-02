@@ -89,7 +89,7 @@ In this map:
 - `response_format` is an optional field of type string representing the format of the transcript output.
 - `temperature` is an optional field of type float64 representing the sampling temperature.
 */
-var CreateTranlationBody = map[string]string{
+var CreateTranslationBody = map[string]string{
 	"model":           "whisper-1",
 	"language":        AllowedIsoLanguages.English,
 	"prompt":          "",

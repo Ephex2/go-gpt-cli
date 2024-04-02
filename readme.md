@@ -9,6 +9,7 @@ This project is a work in progress -- updated docs coming soon!
 Build the project, set up api key:
 
 ``` bash
+cd src
 go build
 ./go-gpt-cli config apikey mykey12345
 ```
