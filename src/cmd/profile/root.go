@@ -46,7 +46,7 @@ var updateCmd = &cobra.Command{
 	Run:               profileUpdateCommandRun,
 	Example:           "go-gpt-cli profile update endpointName configFilePath",
 	Args:              cobra.ExactArgs(2),
-	ValidArgsFunction: validEndpointAndProfileArgs,
+	ValidArgsFunction: validEndpointArgs,
 }
 
 var deleteCmd = &cobra.Command{
@@ -232,7 +232,7 @@ func validEndpointArgs(cmd *cobra.Command, args []string, toComplete string) ([]
 	}
 
 	// "Else"
-	return nil, cobra.ShellCompDirectiveNoFileComp
+	return nil, cobra.ShellCompDirectiveDefault
 }
 
 func validEndpointAndProfileArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
