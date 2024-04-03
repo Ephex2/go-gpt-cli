@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ephex2/go-gpt-cli/cmd/audio"
 	"github.com/ephex2/go-gpt-cli/cmd/chat"
 	"github.com/ephex2/go-gpt-cli/cmd/config"
@@ -11,9 +14,12 @@ import (
 	"github.com/ephex2/go-gpt-cli/cmd/model"
 	"github.com/ephex2/go-gpt-cli/cmd/profile"
 	"github.com/ephex2/go-gpt-cli/config/repository"
+	"github.com/ephex2/go-gpt-cli/log"
 
 	"github.com/spf13/cobra"
 )
+
+var debugMode bool
 
 var rootCmd = &cobra.Command{
 	Use:   "go-gpt-cli",
@@ -31,7 +37,15 @@ func Execute() error {
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(profile.ProfileCmd)
 
-	err := rootCmd.Execute()
+    rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Enable debug logging")
+    err := rootCmd.ParseFlags(os.Args)
+
+    if debugMode {
+        fmt.Println("Debug mode specified")
+        log.SetLogLevel(log.LevelDebug)
+    }
+
+	err = rootCmd.Execute()
 	return err
 }
 

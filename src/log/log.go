@@ -1,55 +1,119 @@
 package log
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"strconv"
+
 	"github.com/ephex2/go-gpt-cli/color"
 )
 
 const (
-    critical = iota
-    warning
-    info
-    debug
+    LevelCritical = iota
+    LevelWarning
+    LevelInfo
+    LevelDebug
 )
 
-var logLevel = info
+var logLevel = LevelCritical
 
-func SetLogLevel(s string) (e error) {
-    switch s {
-        case "debug":
-            logLevel = debug
-        case "info":
-            logLevel = info
-        case "warning":
-            logLevel = warning
-        case "critical":
-            logLevel = critical
+var logWriter io.Writer
+
+var debugLogger *log.Logger
+var infoLogger *log.Logger
+var warningLogger *log.Logger
+var criticalLogger *log.Logger
+
+
+//var Logger *log.Logger
+func SetLogLevel(level int) (e error) {
+    switch level {
+    case LevelCritical:
+            logLevel = LevelCritical
+        case LevelWarning:
+            logLevel = LevelWarning
+        case LevelInfo:
+            logLevel = LevelInfo
+        case LevelDebug:
+            logLevel = LevelDebug
         default:
-            e = InvalidLogError(s)
+            e = InvalidLogError(strconv.Itoa(level))
     }
 
     return
 }
 
+
 func Debug(s string, a ...any)  {
-    if logLevel >= debug {
-        color.ColorPrintf(color.Blue, s, a...)
+    var input string
+
+    if logLevel >= LevelDebug {
+        if logWriter == os.Stdout {
+            input = color.ColorSprintf(color.Blue, s, a)
+        } else {
+            input = fmt.Sprintf(s, a)
+        }
+
+        debugLogger.Print(input)
     }
 }
 
 func Info(s string, a ...any) {
-    if logLevel >= info {
-       color.ColorPrintf(color.Green, s, a...)
+    var input string
+
+    if logLevel >= LevelInfo {
+        if logWriter == os.Stdout {
+            input = color.ColorSprintf(color.Green, s, a)
+        } else {
+            input = fmt.Sprintf(s, a)
+        }
+
+        infoLogger.Print(input)
     }
 }
 
 func Warning(s string, a ...any) {
-    if logLevel >= warning {
-       color.ColorPrintf(color.Yellow, s, a...)
+    var input string
+
+    if logLevel >= LevelWarning {
+        if logWriter == os.Stdout {
+            input = color.ColorSprintf(color.Yellow, s, a)
+        } else {
+            input = fmt.Sprintf(s, a)
+        }
+
+        warningLogger.Print(input)
     }
 }
 
 func Critical(s string, a ...any) {
-    if logLevel >= critical {
-       color.ColorPrintf(color.Red, s, a...)
+    var input string
+
+    if logLevel >= LevelCritical {
+        if logWriter == os.Stdout {
+            input = color.ColorSprintf(color.BrightRed, s, a)
+        } else {
+            input = fmt.Sprintf(s, a)
+        }
     }
+
+    criticalLogger.Print(input)
+}
+
+func init() {
+    logWriter = os.Stdout
+
+    debugLogger = log.New(logWriter, "DEBUG: ", log.Ldate|log.Ltime)
+    infoLogger = log.New(logWriter, "INFO: ", log.Ldate|log.Ltime)
+    warningLogger = log.New(logWriter, "WARING: ", log.Ldate|log.Ltime)
+    criticalLogger = log.New(logWriter, "ERROR: ", log.Ldate|log.Ltime)
+    /*
+    var err error
+    logWriter, err = os.Create("placeholder")
+    if err != nil {
+        panic(err.Error())
+    }
+    */
 }

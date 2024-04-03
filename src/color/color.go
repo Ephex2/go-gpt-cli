@@ -71,6 +71,24 @@ func ColorPrintf(color []byte, format string, a ...any) {
     }
 }
 
+func ColorSprintf(color []byte, format string, a ...any) (s string) {
+    formatBytes := []byte(format)
+
+    if checkColor(color) {
+        formatBytes = append(color, formatBytes...)
+        formatBytes = append(formatBytes, Reset...)
+    }
+
+    // a is set to nil if not provided, and outputs garbage to the terminal.
+    if a == nil {
+        s = fmt.Sprintf(string(formatBytes))
+    } else {
+        s = fmt.Sprintf(string(formatBytes), a)
+    }
+
+    return s
+}
+
 func checkColor(color []byte) bool {
     check := false
 
