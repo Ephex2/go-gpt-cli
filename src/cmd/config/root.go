@@ -59,7 +59,6 @@ func Execute(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	err = cmd.Execute()
-	//if err != nil { return nil }
 
 	return
 }

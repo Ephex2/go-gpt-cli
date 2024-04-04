@@ -74,7 +74,7 @@ In this map:
 */
 var CreateTranscriptionBody = map[string]string{
 	"model":           "whisper-1",
-	"language":        AllowedIsoLanguages.English,
+	"language":        "en",
 	"prompt":          "",
 	"response_format": AllowedTranscriptionResponseFormats.Json,
 	"temperature":     "0",
@@ -91,7 +91,7 @@ In this map:
 */
 var CreateTranslationBody = map[string]string{
 	"model":           "whisper-1",
-	"language":        AllowedIsoLanguages.English,
+	"language":        "en",
 	"prompt":          "",
 	"response_format": AllowedTranslationResponseFormats.Json,
 	"temperature":     "0",
@@ -109,7 +109,7 @@ In this map:
 */
 var CreateVerboseTranscriptionBody = map[string]string{
 	"model":                   "whisper-1",
-	"language":                AllowedIsoLanguages.English,
+	"language":                "en",
 	"prompt":                  "",
 	"response_format":         string(verboseJsonConst),
 	"temperature":             "0",
@@ -127,7 +127,7 @@ In this map:
 */
 var CreateVerboseTranslationBody = map[string]string{
 	"model":           "whisper-1",
-	"language":        AllowedIsoLanguages.English,
+	"language":        "en",
 	"prompt":          "",
 	"response_format": string(verboseJsonConst),
 	"temperature":     "0",
