@@ -2,7 +2,6 @@ package image
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -245,96 +244,76 @@ func formatChat(chat []string) string {
 }
 
 func getImages(folderPath string, imageResponse CreateImageResponse, format string) (ImagePaths []string, err error) {
-	var wg sync.WaitGroup
-	mu := &sync.Mutex{}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer ctx.Done()
-	defer cancel()
+    var wg sync.WaitGroup
+    mu := &sync.Mutex{}
 
-	for _, data := range imageResponse.Data {
-		wg.Add(1)
-		switch format {
-		case "url":
-			go func(url string) {
-				defer wg.Done()
+    for _, data := range imageResponse.Data {
+        wg.Add(1)
+        switch format {
+        case "url":
+            go func(url string) {
+                defer wg.Done()
 
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					uuidHyphen := uuid.NewRandom()
-					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+                uuidHyphen := uuid.NewRandom()
+                uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
 
-					// handle http:// and https:// -> remove them, leaving the 's' prepended on the string in the https case
-					// --> We will only be using these strings to get the extension of a file in a url
-					noProtocol := strings.Replace(url, "http", "", -1)
-					noSeparator := strings.Replace(noProtocol, "://", "", -1)
-                    noQueryParameteres := strings.Split(noSeparator, "?")
+                // handle http:// and https:// -> remove them, leaving the 's' prepended on the string in the https case
+                // --> We will only be using these strings to get the extension of a file in a url
+                noProtocol := strings.Replace(url, "http", "", -1)
+                noSeparator := strings.Replace(noProtocol, "://", "", -1)
+                noQueryParameters := strings.Split(noSeparator, "?")
 
-					ext := filepath.Ext(noQueryParameteres[0])
+                ext := filepath.Ext(noQueryParameters[0])
 
+                actualPath := folderPath + "/" + uuid + ext
 
-					actualPath := folderPath + "/" + uuid + ext
+                e := downloadImage(url, actualPath)
+                if e != nil {
+                    err = e
+                    return
+                }
 
-					e := downloadImage(url, actualPath, ctx)
-					if e != nil {
-						cancel()
-						err = e
-						return
-					}
+                mu.Lock()
+                ImagePaths = append(ImagePaths, actualPath)
+                mu.Unlock()
+            }(data.Url)
+        case "b64_json":
+            go func(b64json string) {
+                defer wg.Done()
 
-					mu.Lock()
-					ImagePaths = append(ImagePaths, actualPath)
-					mu.Unlock()
-				}
-			}(data.Url)
-		case "b64_json":
-			go func(b64json string) {
-				defer wg.Done()
+                buf, err := base64.StdEncoding.DecodeString(b64json)
+                if err != nil {
+                    return
+                }
 
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					buf, err := base64.StdEncoding.DecodeString(b64json)
-					if err != nil {
-						cancel()
-						return
-					}
+                uuidHyphen := uuid.NewRandom()
+                uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
 
-					uuidHyphen := uuid.NewRandom()
-					uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+                jsonBuf, err := json.MarshalIndent(buf, "", "    ")
+                if err != nil {
+                    return
+                }
 
-					jsonBuf, err := json.MarshalIndent(buf, "", "    ")
-					if err != nil {
-						cancel()
-						return
-					}
+                m := mimetype.Detect(jsonBuf)
+                if m.String() != "" {
+                    err = errors.New("mimetype not retrieved from image")
+                    return
+                }
 
-					m := mimetype.Detect(jsonBuf)
-					if m.String() != "" {
-						err = errors.New("mimetype not retrieved from image")
-						return
-					}
+                actualPath := folderPath + "/" + uuid + m.Extension()
 
-					actualPath := folderPath + "/" + uuid + m.Extension()
+                file, err := os.Create(actualPath)
+                if err != nil {
+                    return
+                }
+                defer file.Close()
 
-					file, err := os.Create(actualPath)
-					if err != nil {
-						cancel()
-						return
-					}
-					defer file.Close()
-
-					_, err = io.Copy(file, bytes.NewReader(jsonBuf))
-					if err != nil {
-						cancel()
-						return
-					}
-				}
-			}(data.B64Json)
+                _, err = io.Copy(file, bytes.NewReader(jsonBuf))
+                if err != nil {
+                    return
+                }
+            }(data.B64Json)
 		default:
-			cancel()
 			err = errors.New("response_format not supported. The response format provided is: " + format)
 			return
 		}
@@ -345,8 +324,8 @@ func getImages(folderPath string, imageResponse CreateImageResponse, format stri
 	return
 }
 
-func downloadImage(url string, filePath string, ctx context.Context) (err error) {
-	r, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+func downloadImage(url string, filePath string) (err error) {
+	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
 	}
