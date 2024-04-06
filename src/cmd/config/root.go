@@ -24,6 +24,14 @@ var setKeyCmd = &cobra.Command{
 	Example: "go-gpt-cli config apikey 12345",
 }
 
+var setUrlCmd = &cobra.Command{
+	Use:     "seturl",
+	Short:   "Used to set the base url which will be used when calling API endpoints. Defaults to the OpenAI API url.",
+	Run:     setUrlFunc,
+	Args:    cobra.ExactArgs(1),
+    Example: "go-gpt-cli config seturl http://my.alternative.name:port",
+}
+
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Short:   "Lists the current global settings",
@@ -34,6 +42,14 @@ var getCmd = &cobra.Command{
 
 func setKeyFunc(cmd *cobra.Command, args []string) {
 	err := config.SetApiKey(args[0])
+	if err != nil {
+		log.Critical(err.Error() + "\n")
+		os.Exit(1)
+	}
+}
+
+func setUrlFunc(cmd *cobra.Command, args []string) {
+	err := config.SetBaseUrl(args[0])
 	if err != nil {
 		log.Critical(err.Error() + "\n")
 		os.Exit(1)
@@ -65,5 +81,6 @@ func Execute(cmd *cobra.Command, args []string) (err error) {
 
 func init() {
 	ConfigCmd.AddCommand(setKeyCmd)
+	ConfigCmd.AddCommand(setUrlCmd)
 	ConfigCmd.AddCommand(getCmd)
 }

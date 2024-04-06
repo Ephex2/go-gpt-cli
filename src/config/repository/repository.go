@@ -10,6 +10,7 @@ import (
 	"github.com/ephex2/go-gpt-cli/log"
 )
 
+
 // fileRepository implements both the ProfileRepository and ConfigRepository interfaces
 type fileRepository struct {
 	basePath        string
@@ -50,7 +51,12 @@ func (cr *fileRepository) Init() (err error) {
 		}
 	}
 
-	return nil
+    err = config.RuntimeConfig.Init(*cr)
+    if err != nil {
+        return
+    }
+
+	return
 }
 
 // ConfigRepository implementation

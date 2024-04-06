@@ -33,7 +33,7 @@ func isValidHTTPMethod(method string) bool {
 func GenericRequest(queryParameters map[string]string, body []byte, route string, method string) (buf []byte, err error) {
 	log.Debug("Body is : %s\n", string(body))
 
-	rawUrl := config.BaseUrl + route
+	rawUrl := config.BaseUrl() + route
 	method = strings.ToUpper(method)
 
 	req, err := http.NewRequest(method, rawUrl, bytes.NewBuffer(body))
@@ -80,7 +80,7 @@ func GenericRequest(queryParameters map[string]string, body []byte, route string
 func GenericPaginatedRequest(paginator Paginator, queryParameters map[string]string, body []byte, route string, method string) (err error) {
 	log.Debug("Body is : %s\n", string(body))
 
-	rawUrl := config.BaseUrl + route
+	rawUrl := config.BaseUrl() + route
 	method = strings.ToUpper(method)
 
 	req, err := http.NewRequest(method, rawUrl, bytes.NewBuffer(body))
@@ -191,7 +191,7 @@ func MultiPartFormRequest(fileDetails []FileUploadDetails, fields map[string]str
 	}
 
 	// Setup request, using buf generated for multi part form fields
-	req, err := http.NewRequest(method, config.BaseUrl+route, buf)
+	req, err := http.NewRequest(method, config.BaseUrl()+route, buf)
 	if err != nil {
 		return
 	}

@@ -1,13 +1,16 @@
 package config
 
 import (
+	"errors"
+	"net/url"
+
 	"github.com/ephex2/go-gpt-cli/config/profile"
 )
 
-// TODO: Migrate this to RuntimeConfig, with default value of https://api.openai.com
-const BaseUrl string = "https://api.openai.com"
-
-// const BaseUrl string = "http://192.168.2.31:8080"
+//  This will be the base url for the config store if it is not set yet.
+//  After a first run, the command SetBaseUrl of the config repository can be used to set this value
+const defaultBaseUrl string = "https://api.openai.com"
+const baseUrlKeyName string = "BaseUrl"
 
 type ConfigRepository interface {
 	Get() (Config, error)
@@ -23,12 +26,54 @@ type Config struct {
 // This repository can be used to make modifications to the config.
 var RuntimeConfig Config
 
+func BaseUrl() string {
+    if url, ok := RuntimeConfig.Settings[baseUrlKeyName] ; ok {
+        return url
+    } 
+
+    return defaultBaseUrl
+}
+
+func SetBaseUrl(baseurl string) (err error) {
+    u, err := url.Parse(baseurl)
+	if err != nil {
+		return
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		err = errors.New("Invalid URL, scheme is not http or https. It is: " + u.Scheme)
+        return 
+	}
+
+	if u.Host == "" {
+		err = errors.New("Invalid URL. URL provided had no host.")
+        return
+	}
+
+    // Url ok, set config
+    RuntimeConfig.Settings[baseUrlKeyName] = baseurl
+    err = RuntimeConfig.Repository.Set(RuntimeConfig)
+    if err != nil {
+        return
+    }
+
+    return
+}
+
+
 // Used to initialize the config's settings stored in its repository
 func (c *Config) Init(cr ConfigRepository) (err error) {
 	*c, err = cr.Get()
 	if err != nil {
 		return
 	}
+
+    // If default URL isn't set, create 
+    _, ok := c.Settings[baseUrlKeyName]
+    if !ok {
+        c.Settings[baseUrlKeyName] = defaultBaseUrl
+        cr.Set(*c)
+    }
 
 	return
 }
