@@ -27,10 +27,10 @@ const editImageRoute string = "/edits"
 const createVariationRoute string = "/variations"
 
 func CreateImage(folderPath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
-    err = testFolderExists(folderPath)
-    if err != nil {
-        return
-    }
+	err = testFolderExists(folderPath)
+	if err != nil {
+		return
+	}
 
 	msg := formatChat(prompt)
 
@@ -57,15 +57,20 @@ func CreateImage(folderPath string, prompt []string) (ImagePaths []string, revis
 		return
 	}
 
-	ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateImageBody.ResponseFormat)
+	if imageProfile.CreateImageBody.ResponseFormat == nil {
+		ImagePaths, err = getImages(folderPath, imageResponse, "url")
+	} else {
+		ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateImageBody.ResponseFormat)
+	}
+
 	return
 }
 
 func CreateDalle3Image(folderPath string, prompt []string) (ImagePaths []string, revisedPrompt string, err error) {
-    err = testFolderExists(folderPath)
-    if err != nil {
-        return
-    }
+	err = testFolderExists(folderPath)
+	if err != nil {
+		return
+	}
 
 	msg := formatChat(prompt)
 
@@ -97,15 +102,20 @@ func CreateDalle3Image(folderPath string, prompt []string) (ImagePaths []string,
 		return
 	}
 
-	ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateDalle3ImageBody.ResponseFormat)
+	if imageProfile.CreateDalle3ImageBody.ResponseFormat == nil {
+		ImagePaths, err = getImages(folderPath, imageResponse, "url")
+	} else {
+		ImagePaths, err = getImages(folderPath, imageResponse, *imageProfile.CreateDalle3ImageBody.ResponseFormat)
+	}
+
 	return
 }
 
 func CreateEdit(filePath string, mask *os.File, folderPath string, prompt []string) (imagePaths []string, err error) {
-    err = testFolderExists(folderPath)
-    if err != nil {
-        return
-    }
+	err = testFolderExists(folderPath)
+	if err != nil {
+		return
+	}
 
 	imageProfile, err := getDefaultProfile()
 	if err != nil {
@@ -161,8 +171,8 @@ func CreateEdit(filePath string, mask *os.File, folderPath string, prompt []stri
 		return
 	}
 
-	format := fieldMap["response_format"]
-	if format == "" {
+	format, ok := fieldMap["response_format"]
+	if !ok {
 		format = "url"
 	}
 
@@ -174,10 +184,10 @@ func CreateEdit(filePath string, mask *os.File, folderPath string, prompt []stri
 // Creates an image variation from the image provided at path filePath
 // Returns a list of the new image paths for the new image variations created.
 func CreateVariation(filePath string, folderPath string) (imagePaths []string, err error) {
-    err = testFolderExists(folderPath)
-    if err != nil {
-        return
-    }
+	err = testFolderExists(folderPath)
+	if err != nil {
+		return
+	}
 
 	imageProfile, err := getDefaultProfile()
 	if err != nil {
@@ -218,8 +228,8 @@ func CreateVariation(filePath string, folderPath string) (imagePaths []string, e
 		return
 	}
 
-	format := fieldMap["response_format"]
-	if format == "" {
+	format, ok := fieldMap["response_format"]
+	if !ok {
 		format = "url"
 	}
 
@@ -244,75 +254,75 @@ func formatChat(chat []string) string {
 }
 
 func getImages(folderPath string, imageResponse CreateImageResponse, format string) (ImagePaths []string, err error) {
-    var wg sync.WaitGroup
-    mu := &sync.Mutex{}
+	var wg sync.WaitGroup
+	mu := &sync.Mutex{}
 
-    for _, data := range imageResponse.Data {
-        wg.Add(1)
-        switch format {
-        case "url":
-            go func(url string) {
-                defer wg.Done()
+	for _, data := range imageResponse.Data {
+		wg.Add(1)
+		switch format {
+		case "url":
+			go func(url string) {
+				defer wg.Done()
 
-                uuidHyphen := uuid.NewRandom()
-                uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+				uuidHyphen := uuid.NewRandom()
+				uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
 
-                // handle http:// and https:// -> remove them, leaving the 's' prepended on the string in the https case
-                // --> We will only be using these strings to get the extension of a file in a url
-                noProtocol := strings.Replace(url, "http", "", -1)
-                noSeparator := strings.Replace(noProtocol, "://", "", -1)
-                noQueryParameters := strings.Split(noSeparator, "?")
+				// handle http:// and https:// -> remove them, leaving the 's' prepended on the string in the https case
+				// --> We will only be using these strings to get the extension of a file in a url
+				noProtocol := strings.Replace(url, "http", "", -1)
+				noSeparator := strings.Replace(noProtocol, "://", "", -1)
+				noQueryParameters := strings.Split(noSeparator, "?")
 
-                ext := filepath.Ext(noQueryParameters[0])
+				ext := filepath.Ext(noQueryParameters[0])
 
-                actualPath := folderPath + "/" + uuid + ext
+				actualPath := folderPath + "/" + uuid + ext
 
-                e := downloadImage(url, actualPath)
-                if e != nil {
-                    err = e
-                    return
-                }
+				e := downloadImage(url, actualPath)
+				if e != nil {
+					err = e
+					return
+				}
 
-                mu.Lock()
-                ImagePaths = append(ImagePaths, actualPath)
-                mu.Unlock()
-            }(data.Url)
-        case "b64_json":
-            go func(b64json string) {
-                defer wg.Done()
+				mu.Lock()
+				ImagePaths = append(ImagePaths, actualPath)
+				mu.Unlock()
+			}(data.Url)
+		case "b64_json":
+			go func(b64json string) {
+				defer wg.Done()
 
-                buf, err := base64.StdEncoding.DecodeString(b64json)
-                if err != nil {
-                    return
-                }
+				buf, err := base64.StdEncoding.DecodeString(b64json)
+				if err != nil {
+					return
+				}
 
-                uuidHyphen := uuid.NewRandom()
-                uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
+				uuidHyphen := uuid.NewRandom()
+				uuid := strings.Replace(uuidHyphen.String(), "-", "", -1)
 
-                jsonBuf, err := json.MarshalIndent(buf, "", "    ")
-                if err != nil {
-                    return
-                }
+				jsonBuf, err := json.MarshalIndent(buf, "", "    ")
+				if err != nil {
+					return
+				}
 
-                m := mimetype.Detect(jsonBuf)
-                if m.String() != "" {
-                    err = errors.New("mimetype not retrieved from image")
-                    return
-                }
+				m := mimetype.Detect(jsonBuf)
+				if m.String() != "" {
+					err = errors.New("mimetype not retrieved from image")
+					return
+				}
 
-                actualPath := folderPath + "/" + uuid + m.Extension()
+				actualPath := folderPath + "/" + uuid + m.Extension()
 
-                file, err := os.Create(actualPath)
-                if err != nil {
-                    return
-                }
-                defer file.Close()
+				file, err := os.Create(actualPath)
+				if err != nil {
+					return
+				}
+				defer file.Close()
 
-                _, err = io.Copy(file, bytes.NewReader(jsonBuf))
-                if err != nil {
-                    return
-                }
-            }(data.B64Json)
+				_, err = io.Copy(file, bytes.NewReader(jsonBuf))
+				if err != nil {
+					return
+				}
+			}(data.B64Json)
 		default:
 			err = errors.New("response_format not supported. The response format provided is: " + format)
 			return

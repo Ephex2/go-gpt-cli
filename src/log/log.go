@@ -17,7 +17,7 @@ const (
 	LevelDebug
 )
 
-var logLevel = LevelCritical
+var logLevel = LevelInfo
 
 var logWriter io.Writer
 

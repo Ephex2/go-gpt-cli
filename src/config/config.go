@@ -68,13 +68,6 @@ func (c *Config) Init(cr ConfigRepository) (err error) {
 		return
 	}
 
-    // If default URL isn't set, create 
-    _, ok := c.Settings[baseUrlKeyName]
-    if !ok {
-        c.Settings[baseUrlKeyName] = defaultBaseUrl
-        cr.Set(*c)
-    }
-
 	return
 }
 

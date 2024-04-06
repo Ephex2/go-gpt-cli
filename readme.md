@@ -33,6 +33,16 @@ A sunrise story without end.
 
 <br/>
 
+## Change Base Url  
+
+If you want to connect to another API which implements the OpenAI API spec, the URL can be changed quickly using the seturl command
+
+``` bash
+./go-gpt-cli config seturl http://my.local.instance:PORT
+```
+
+<br/>
+
 ## Profiles and Endpoints
 
 The term used for the routes which offer different functionality (image handling, chat completions, etc.) in this project is 'endpoints'.

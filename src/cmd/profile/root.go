@@ -25,7 +25,7 @@ var readCmd = &cobra.Command{
 	Run:               profileReadCommandRun,
 	Example:           "go-gpt-cli profile read endpointName profileName",
 	Args:              cobra.ExactArgs(2),
-    Aliases: []string{"get"},
+	Aliases:           []string{"get"},
 	ValidArgsFunction: validEndpointAndProfileArgs,
 }
 
@@ -35,7 +35,7 @@ var createCmd = &cobra.Command{
 	Run:               profileCreateCommandRun,
 	Example:           "go-gpt-cli profile create endpointName profileName",
 	Args:              cobra.ExactArgs(2),
-    Aliases: []string{"new"},
+	Aliases:           []string{"new"},
 	ValidArgsFunction: validEndpointArgs, // don't autosuggest existing profiles
 }
 
@@ -55,7 +55,7 @@ var deleteCmd = &cobra.Command{
 	Run:               profileDeleteCommandRun,
 	Example:           "go-gpt-cli profile delete endpointName profileName",
 	Args:              cobra.ExactArgs(2),
-    Aliases: []string{"remove"},
+	Aliases:           []string{"remove"},
 	ValidArgsFunction: validEndpointAndProfileArgs,
 }
 
@@ -65,7 +65,7 @@ var getAllCmd = &cobra.Command{
 	Run:               profileGetAllCommandRun,
 	Example:           "go-gpt-cli profile getall endpointName",
 	Args:              cobra.ExactArgs(1),
-    Aliases: []string{"list"},
+	Aliases:           []string{"list"},
 	ValidArgsFunction: validEndpointAndProfileArgs,
 }
 
@@ -183,7 +183,7 @@ func profileGetAllCommandRun(cmd *cobra.Command, args []string) {
 	}
 
 	for _, name := range names {
-		log.Info(name + "\n")
+		fmt.Println(name)
 	}
 }
 

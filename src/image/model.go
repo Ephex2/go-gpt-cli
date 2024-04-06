@@ -1,8 +1,6 @@
 package image
 
-// Note that the Create images endpoint seems to differ in its parameters for dall-e-2 and dall-e-3. Creating a generic implementation that can plug into localAi implementations.
-
-// TODO -- test | for negative prompts
+// Note that the Create images endpoint seems to differ in its parameters for dall-e-2 and dall-e-3.
 var CreateImageEditBody = map[string]string{
 	"model": "dall-e-2",
 	"n":     "1",
@@ -18,23 +16,23 @@ var CreateVariationBody = map[string]string{
 }
 
 type CreateImageBody struct {
-	Prompt         string `json:"prompt"`
+	Prompt         string  `json:"prompt"`
 	Model          *string `json:"model,omitempty"`
 	N              *int    `json:"n,omitempty"`
 	ResponseFormat *string `json:"response_format,omitempty"`
 	Size           *string `json:"size,omitempty"`
-	User           string `json:"user,omitempty"`
+	User           string  `json:"user,omitempty"`
 }
 
 type CreateDalle3ImageBody struct {
-	Prompt         string `json:"prompt"`
+	Prompt         string  `json:"prompt"`
 	Model          *string `json:"model,omitempty"`
 	N              *int    `json:"n,omitempty"`
 	Quality        *string `json:"quality,omitempty"`
 	ResponseFormat *string `json:"response_format,omitempty"`
 	Size           *string `json:"size,omitempty"`
 	Style          *string `json:"style,omitempty"`
-	User           string `json:"user,omitempty"`
+	User           string  `json:"user,omitempty"`
 }
 
 type CreateImageResponse struct {
@@ -50,18 +48,18 @@ type ImageResponse struct {
 
 func GetDefaultCreateImageBody() CreateImageBody {
 	model := new(string)
-    *model = "dall-e-2"
+	*model = "dall-e-2"
 
-    n := new(int)
-    *n = 1
+	n := new(int)
+	*n = 1
 
-    rFormat := new(string)
-    *rFormat = "url"
+	rFormat := new(string)
+	*rFormat = "url"
 
-    size := new(string)
-    *size = "256x256"
+	size := new(string)
+	*size = "256x256"
 
-    return CreateImageBody{
+	return CreateImageBody{
 		Prompt:         "",
 		Model:          model,
 		N:              n,
@@ -73,22 +71,22 @@ func GetDefaultCreateImageBody() CreateImageBody {
 
 func GetDefaultDalle3Body() CreateDalle3ImageBody {
 	model := new(string)
-    *model = "dall-e-3"
+	*model = "dall-e-3"
 
-    n := new(int)
-    *n = 1
+	n := new(int)
+	*n = 1
 
-    quality := new(string)
-    *quality = "hd"
+	quality := new(string)
+	*quality = "hd"
 
-    rFormat := new(string)
-    *rFormat = "url"
+	rFormat := new(string)
+	*rFormat = "url"
 
-    size := new(string)
-    *size = "1792x1024"
+	size := new(string)
+	*size = "1792x1024"
 
-    style := new(string)
-    *style = "vivid"
+	style := new(string)
+	*style = "vivid"
 
 	return CreateDalle3ImageBody{
 		Prompt:         "",
