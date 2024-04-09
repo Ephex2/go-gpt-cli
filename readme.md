@@ -128,7 +128,7 @@ This project uses standard cobra completions. To list documents that would help 
 
 To load completions:
 
-Bash:q
+Bash:
 
   $ source <(go-gpt-cli completion bash)
 
