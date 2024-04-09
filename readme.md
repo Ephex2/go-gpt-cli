@@ -1,6 +1,11 @@
-# Work In Progress
+# Overview
 
-This project is a work in progress -- updated docs coming soon! 
+This project is meant to provide a CLI tool to allow you to interact with servers that implement the OpenAI API spec.
+
+It offers the ability to create different profiles for different endpoints, allowing for the ability to quickly swap between different sets of saved parameters for different endpoints. For example, there could be a profile with a system prompt that is optimized for completing requests for code, while another could be setup for a more conversational experience.
+
+This project is still a work in progress - let me know if anything needs immediate improvement!
+
 
 <br/>
 
@@ -98,6 +103,7 @@ To list existing default profiles, use the ```config get``` command:
 
 {
   "ApiKey": "abc123",
+  "BaseUrl": "https://api.openai.com",
   "audioDefaultProfile": "default",
   "chatDefaultProfile": "default",
   "embeddingsDefaultProfile": "default",
@@ -105,7 +111,6 @@ To list existing default profiles, use the ```config get``` command:
   "finetuningDefaultProfile": "default",
   "imageDefaultProfile": "default"
 }
-
 ```
 
 **Note:** that this will also output your apikey in plaintext.
@@ -123,7 +128,7 @@ This project uses standard cobra completions. To list documents that would help 
 
 To load completions:
 
-Bash:
+Bash:q
 
   $ source <(go-gpt-cli completion bash)
 
@@ -168,4 +173,7 @@ Flags:
 ```
 
 Use the completion docs to know what commands will set up completions for your current shell and profile.
+
+
+
 
