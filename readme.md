@@ -11,7 +11,7 @@ This project is still a work in progress - let me know if anything needs immedia
 
 ## Quickstart
 
-Build the project, set up api key:
+Build the project, and set up the api key:
 
 ``` bash
 cd src
@@ -40,7 +40,7 @@ A sunrise story without end.
 
 ## Change Base Url  
 
-If you want to connect to another API which implements the OpenAI API spec, the URL can be changed quickly using the seturl command
+If you want to connect to another API which implements the OpenAI API spec, the URL can be changed quickly using the seturl command:
 
 ``` bash
 ./go-gpt-cli config seturl http://my.local.instance:PORT
@@ -52,7 +52,7 @@ If you want to connect to another API which implements the OpenAI API spec, the 
 
 The term used for the routes which offer different functionality (image handling, chat completions, etc.) in this project is 'endpoints'.
 
-Example of endpoints are:
+Examples of endpoints are:
 
 - audio
 - chat
@@ -60,7 +60,7 @@ Example of endpoints are:
 - embeddings
 - and more
 
-Each endpoint which can be used to make calls to the API that require parameters (e.g. model is excluded) will have an associated profile.
+Each endpoint which can be used to make calls to the API and requires parameters to be set (e.g. model is excluded) will have an associated profile.
 
 These profiles can be used to modify the values sent in a request to the api.
 
@@ -70,7 +70,7 @@ To list profile commands available use:
 ./go-gpt-cli profile -h
 ```
 
-You can create profiles by specifying and endpoint and name for them, as seen below:
+You can create profiles by specifying an endpoint and name for them, as seen below:
 
 ``` bash
 ./go-gpt-cli profile create chat codereview
@@ -88,13 +88,13 @@ Profiles are represented as json; they be read and updated as required:
 ./go-gpt-cli profile updated chat ./codeprofile.json
 ```
 
-A profile can be set as the profile to be used for commands using the endpoint by using the 'default' command:
+A profile can be set as the default profile to be used for an endpoint by using the 'default' command:
 
 ``` bash
 ./go-gpt-cli profile default chat codereview
 ```
 
-A default profile will be created and set as the default for an endpoint if no default profile for an endpoint exists while a command using that endpoint is run.
+A default profile (as specified by values set in the code) will be created and set as the default for an endpoint if no default profile for an endpoint exists when a command using that endpoint is run.
 
 To list existing default profiles, use the ```config get``` command:
 
@@ -113,15 +113,13 @@ To list existing default profiles, use the ```config get``` command:
 }
 ```
 
-**Note:** that this will also output your apikey in plaintext.
-
-To know which endpoints / profiles are available, completions can be used to help from the command line.
+**Note:** This will also output your apikey in plain-text.
 
 <br/>
 
 ## Cobra completions
 
-This project uses standard cobra completions. To list documents that would help with setup, use ```completion -h```:
+This project uses standard cobra completions to help autocomplete shell commands. To setup documentation for completions, use ```completion -h```:
 
 ``` bash
 ./go-gpt-cli completion -h
@@ -171,9 +169,4 @@ Usage:
 Flags:
   -h, --help   help for completion
 ```
-
-Use the completion docs to know what commands will set up completions for your current shell and profile.
-
-
-
 
