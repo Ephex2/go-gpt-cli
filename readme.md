@@ -70,7 +70,7 @@ To list profile commands available use:
 ./go-gpt-cli profile -h
 ```
 
-You can create profiles by specifying an endpoint and name for them, as seen below:
+You can create profiles by specifying an endpoint name and name for them, as seen below:
 
 ``` bash
 ./go-gpt-cli profile create chat codereview
@@ -78,7 +78,7 @@ You can create profiles by specifying an endpoint and name for them, as seen bel
 # ./go-gpt-cli profile create <endpointName> <profileName>
 ```
 
-Profiles are represented as json; they be read and updated as required:
+Profiles are represented as json; they can be read and updated as required:
 
 ``` bash
 ./go-gpt-cli profile read chat codereview > codeprofile.json
@@ -94,7 +94,7 @@ A profile can be set as the default profile to be used for an endpoint by using 
 ./go-gpt-cli profile default chat codereview
 ```
 
-A default profile (as specified by values set in the code) will be created and set as the default for an endpoint if no default profile for an endpoint exists when a command using that endpoint is run.
+A default profile (as specified by values set in the code) will be created and set as the default profile to be used for an endpoint if no default profile for an endpoint exists when a command using that endpoint is run.
 
 To list existing default profiles, use the ```config get``` command:
 
@@ -114,6 +114,18 @@ To list existing default profiles, use the ```config get``` command:
 ```
 
 **Note:** This will also output your apikey in plain-text.
+
+To list the different endpoints which make use of profiles, you can run the 'profile endpoints' command:
+
+``` bash
+./go-gpt-cli profile endpoints
+embeddings
+file
+finetuning
+audio
+chat
+image
+```
 
 <br/>
 

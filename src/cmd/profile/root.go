@@ -69,6 +69,14 @@ var getAllCmd = &cobra.Command{
 	ValidArgsFunction: validEndpointAndProfileArgs,
 }
 
+var endpointsCmd = &cobra.Command{
+	Use:               "endpoints",
+	Short:             "Get all endpoints that can use profiles",
+	Run:               endpointsCommandRun,
+	Example:           "go-gpt-cli profile endpoints",
+	Args:              cobra.ExactArgs(0),
+}
+
 var defaultCmd = &cobra.Command{
 	Use:               "default",
 	Short:             "Sets the default profile for an endpoint",
@@ -84,6 +92,7 @@ func init() {
 	ProfileCmd.AddCommand(updateCmd)
 	ProfileCmd.AddCommand(deleteCmd)
 	ProfileCmd.AddCommand(getAllCmd)
+	ProfileCmd.AddCommand(endpointsCmd)
 	ProfileCmd.AddCommand(defaultCmd)
 
 }
@@ -179,6 +188,18 @@ func profileGetAllCommandRun(cmd *cobra.Command, args []string) {
 	names, err := profile.RuntimeRepository.GetAll(endpointName)
 	if err != nil {
 		log.Debug(err.Error() + "\n")
+		return
+	}
+
+	for _, name := range names {
+		fmt.Println(name)
+	}
+}
+
+func endpointsCommandRun(cmd *cobra.Command, args []string) {
+	names, err := profile.EndpointRegistry.List()
+	if err != nil {
+		log.Critical(err.Error() + "\n")
 		return
 	}
 
