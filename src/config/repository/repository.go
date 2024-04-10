@@ -72,10 +72,13 @@ func (cr fileRepository) Get() (baseConfig config.Config, err error) {
 	}
 
 	settingsMap := make(map[string]string)
-	err = json.Unmarshal(buf, &settingsMap)
-	if err != nil {
-		return
-	}
+    
+    if len(buf) != 0 {
+        err = json.Unmarshal(buf, &settingsMap)
+	    if err != nil {
+		    return
+	    }
+    }
 
 	baseConfig = config.Config{
 		Repository: cr,
