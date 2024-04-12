@@ -7,7 +7,7 @@ import (
 )
 
 func ListModels() (models []Model, err error) {
-	res, err := api.GenericRequest(nil, nil, ModelRoute, "GET")
+	res, err := api.GenericRequest(nil, nil, ModelRoute, "GET", "")
 	if err != nil {
 		return
 	}
@@ -23,7 +23,7 @@ func ListModels() (models []Model, err error) {
 }
 
 func RetrieveModel(name string) (model Model, err error) {
-	buf, err := api.GenericRequest(nil, nil, ModelRoute+"/"+name, "GET")
+	buf, err := api.GenericRequest(nil, nil, ModelRoute+"/"+name, "GET", "")
 	if err != nil {
 		return
 	}
@@ -38,7 +38,7 @@ func RetrieveModel(name string) (model Model, err error) {
 
 func DeleteModel(name string) (dres DeleteModelResponse, err error) {
 	route := ModelRoute + "/" + name
-	buf, err := api.GenericRequest(nil, nil, route, "DELETE")
+	buf, err := api.GenericRequest(nil, nil, route, "DELETE", "")
 	if err != nil {
 		return
 	}

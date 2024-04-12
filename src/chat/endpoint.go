@@ -23,6 +23,7 @@ func (ce chatEndpoint) DefaultProfile() profile.Profile {
 		CreateCompletionBody:       GetDefaultBody(),
 		CreateVisionCompletionBody: GetDefaultVisionBody(),
 		MessageHistory:       false,
+        Url: "",
 	}
 
 	return p

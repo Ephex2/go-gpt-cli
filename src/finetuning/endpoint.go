@@ -19,6 +19,7 @@ func (e finetuningEndpoint) DefaultProfile() profile.Profile {
 	p := FineTuningProfile{
 		ProfileName:           "default",
 		CreateFineTuneBody: DefaultCreateFineTuneBody(),
+        Url: "",
 	}
 
 	return p

@@ -40,7 +40,7 @@ func CreateSpeech(prompt []string) (speechPath string, err error) {
 		return
 	}
 
-	buf, err := api.GenericRequest(nil, bodyBuf, createSpeechRoute, "POST")
+	buf, err := api.GenericRequest(nil, bodyBuf, createSpeechRoute, "POST", audioP.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -87,7 +87,7 @@ func CreateTranscription(filePath string, prompt []string) (s string, err error)
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST", audioP.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -136,7 +136,7 @@ func CreateTranslation(filePath string, prompt []string) (s string, err error) {
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranslationRoute, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranslationRoute, "POST", audioP.OverrideUrl())
 
 	format := fieldMap["response_format"]
 
@@ -190,7 +190,7 @@ func CreateVerboseTranscription(filePath string, prompt []string) (resp CreateVe
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST", audioP.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -241,7 +241,7 @@ func CreateVerboseTranslation(filePath string, prompt []string) (resp CreateVerb
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, createTranscriptionRoute, "POST", audioP.OverrideUrl())
 	if err != nil {
 		return
 	}

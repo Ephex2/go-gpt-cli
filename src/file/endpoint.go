@@ -19,6 +19,7 @@ func (e fileEndpoint) DefaultProfile() profile.Profile {
 	p := FileProfile{
 		ProfileName:    "default",
 		CreateFileBody: GetDefaultBody(),
+        Url: "",
 	}
 
 	return p

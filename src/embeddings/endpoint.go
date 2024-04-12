@@ -19,6 +19,7 @@ func (e embeddingsEndpoint) DefaultProfile() profile.Profile {
 	p := EmbeddingsProfile{
 		ProfileName:         "default",
 		CreateEmbeddingBody: GetDefaultBody(),
+        Url: "",
 	}
 
 	return p

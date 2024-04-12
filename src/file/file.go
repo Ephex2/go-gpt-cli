@@ -48,7 +48,7 @@ func CreateFile(purpose string, filePath string) (resp File, err error) {
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(fileDetails, p.CreateFileBody, BaseFileRoute, "POST")
+	buf, err := api.MultiPartFormRequest(fileDetails, p.CreateFileBody, BaseFileRoute, "POST", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -62,8 +62,13 @@ func CreateFile(purpose string, filePath string) (resp File, err error) {
 }
 
 func DeleteFile(fileId string) (status DeleteStatus, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	route := BaseFileRoute + "/" + fileId
-	buf, err := api.GenericRequest(nil, nil, route, "DELETE")
+	buf, err := api.GenericRequest(nil, nil, route, "DELETE", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -77,8 +82,13 @@ func DeleteFile(fileId string) (status DeleteStatus, err error) {
 }
 
 func GetFile(fileId string) (buf []byte, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	route := BaseFileRoute + "/" + fileId + "/content"
-	buf, err = api.GenericRequest(nil, nil, route, "GET")
+	buf, err = api.GenericRequest(nil, nil, route, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -87,8 +97,13 @@ func GetFile(fileId string) (buf []byte, err error) {
 }
 
 func StatFile(fileId string) (file File, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	route := BaseFileRoute + "/" + fileId
-	buf, err := api.GenericRequest(nil, nil, route, "GET")
+	buf, err := api.GenericRequest(nil, nil, route, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -102,7 +117,12 @@ func StatFile(fileId string) (file File, err error) {
 }
 
 func ListFiles() (files FileList, err error) {
-	buf, err := api.GenericRequest(nil, nil, BaseFileRoute, "GET")
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
+	buf, err := api.GenericRequest(nil, nil, BaseFileRoute, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}

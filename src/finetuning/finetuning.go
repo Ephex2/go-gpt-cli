@@ -96,8 +96,13 @@ func (paginator *listJobEventsPaginator) Continue(req *http.Request, res *http.R
 }
 
 func CancelJob(id string) (resp Job, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	route := BaseFineTuningRoute + "/jobs/" + id + "/cancel"
-	buf, err := api.GenericRequest(nil, nil, route, "POST")
+	buf, err := api.GenericRequest(nil, nil, route, "POST", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -111,8 +116,13 @@ func CancelJob(id string) (resp Job, err error) {
 }
 
 func GetJob(id string) (resp Job, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	route := BaseFineTuningRoute + "/jobs/" + id
-	buf, err := api.GenericRequest(nil, nil, route, "GET")
+	buf, err := api.GenericRequest(nil, nil, route, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -127,10 +137,15 @@ func GetJob(id string) (resp Job, err error) {
 
 // List all fine-tune jobs on the API.
 func ListJobs() (resp []Job, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	paginator := listJobsPaginator{}
 	route := BaseFineTuningRoute + "/jobs"
 
-	err = api.GenericPaginatedRequest(&paginator, defaultPaginationQueryParameters, nil, route, "GET")
+	err = api.GenericPaginatedRequest(&paginator, defaultPaginationQueryParameters, nil, route, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -143,10 +158,15 @@ func ListJobs() (resp []Job, err error) {
 }
 
 func ListEvents(id string) (resp []JobEvent, err error) {
+    p, err := getDefaultProfile()
+    if err != nil {
+        return
+    }
+
 	paginator := listJobEventsPaginator{}
 	route := BaseFineTuningRoute + "/jobs/" + id + "/events"
 
-	err = api.GenericPaginatedRequest(&paginator, defaultPaginationQueryParameters, nil, route, "GET")
+	err = api.GenericPaginatedRequest(&paginator, defaultPaginationQueryParameters, nil, route, "GET", p.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -178,7 +198,7 @@ func CreateJob(id string) (resp Job, err error) {
 	}
 
 	route := BaseFineTuningRoute + "/jobs"
-	buf, err := api.GenericRequest(nil, reqBuf, route, "POST")
+	buf, err := api.GenericRequest(nil, reqBuf, route, "POST", p.OverrideUrl())
 	if err != nil {
 		return
 	}

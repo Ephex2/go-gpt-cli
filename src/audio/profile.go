@@ -17,7 +17,8 @@ type AudioProfile struct {
 	CreateVerboseTranscriptionBody map[string]string
 	CreateTranslationBody          map[string]string
 	CreateVerboseTranslationBody   map[string]string
-	SaveDirectory                  string // Blank by default, results in temporary files being created if blank.
+	SaveDirectory                  string // Blank by default, results in temporary files being created if blank
+    Url                            string
 }
 
 func (a AudioProfile) Name() string {
@@ -26,6 +27,10 @@ func (a AudioProfile) Name() string {
 	}
 
 	return a.ProfileName
+}
+
+func (a AudioProfile) OverrideUrl() string {
+    return a.Url
 }
 
 func (a AudioProfile) SetName(name string) profile.Profile {

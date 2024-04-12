@@ -11,9 +11,10 @@ type Repository interface {
 
 type Profile interface {
 	Name() string
-	SetName(string) Profile
-	ProfileRepository() Repository
 	Endpoint() Endpoint
+    OverrideUrl() string
+	ProfileRepository() Repository
+	SetName(string) Profile
 }
 
 var RuntimeRepository Repository

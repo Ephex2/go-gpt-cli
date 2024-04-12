@@ -10,6 +10,7 @@ import (
 type EmbeddingsProfile struct {
 	ProfileName         string
 	CreateEmbeddingBody CreateEmbeddingBody
+    Url         string
 }
 
 func (p EmbeddingsProfile) Name() string {
@@ -18,6 +19,10 @@ func (p EmbeddingsProfile) Name() string {
 	}
 
 	return p.ProfileName
+}
+
+func (p EmbeddingsProfile) OverrideUrl() string {
+    return p.Url
 }
 
 func (p EmbeddingsProfile) SetName(name string) profile.Profile {

@@ -10,6 +10,7 @@ import (
 type FileProfile struct {
 	ProfileName    string
 	CreateFileBody map[string]string
+    Url            string
 }
 
 func (p FileProfile) Name() string {
@@ -18,6 +19,10 @@ func (p FileProfile) Name() string {
 	}
 
 	return p.ProfileName
+}
+
+func (p FileProfile) OverrideUrl() string {
+    return p.Url
 }
 
 func (p FileProfile) SetName(name string) profile.Profile {

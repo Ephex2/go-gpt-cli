@@ -64,11 +64,7 @@ Each endpoint which can be used to make calls to the API and requires parameters
 
 These profiles can be used to modify the values sent in a request to the api.
 
-To list profile commands available use:
-
-``` bash
-./go-gpt-cli profile -h
-```
+#### Profile Create
 
 You can create profiles by specifying an endpoint name and name for them, as seen below:
 
@@ -77,6 +73,8 @@ You can create profiles by specifying an endpoint name and name for them, as see
 
 # ./go-gpt-cli profile create <endpointName> <profileName>
 ```
+
+#### Profile Read
 
 Profiles are represented as json; they can be read and updated as required:
 
@@ -87,6 +85,8 @@ Profiles are represented as json; they can be read and updated as required:
 # update the profile
 ./go-gpt-cli profile updated chat ./codeprofile.json
 ```
+
+#### Default Profiles
 
 A profile can be set as the default profile to be used for an endpoint by using the 'default' command:
 
@@ -114,6 +114,26 @@ To list existing default profiles, use the ```config get``` command:
 ```
 
 **Note:** This will also output your apikey in plain-text.
+
+#### Set a URL Override for a Profile
+
+Profiles should have a Url property, as shown below:
+
+``` bash
+{
+    "ProfileName": "default",
+    "CreateCompletionBody": {
+        "messages": [
+        ...
+    "Url": ""
+}
+```
+
+If the Url property is an empty string, as above, it will be disregarded.
+
+Otherwise, the Url property will override the base url set by the go-gpt-cli configuration ( set with ./go-gpt-cli config seturl <url> )
+
+#### Profile Endpoints
 
 To list the different endpoints which make use of profiles, you can run the 'profile endpoints' command:
 

@@ -13,8 +13,6 @@ import (
 	"github.com/ephex2/go-gpt-cli/log"
 )
 
-//var BaseUrl = "https://api.openai.com"
-
 var allowedMethods = map[string]bool{
 	"GET":     true,
 	"POST":    true,
@@ -30,10 +28,16 @@ func isValidHTTPMethod(method string) bool {
 	return ok
 }
 
-func GenericRequest(queryParameters map[string]string, body []byte, route string, method string) (buf []byte, err error) {
+func GenericRequest(queryParameters map[string]string, body []byte, route string, method string, overrideUrl string) (buf []byte, err error) {
 	log.Debug("Body is : %s\n", string(body))
 
-	rawUrl := config.BaseUrl() + route
+    var rawUrl string
+    if overrideUrl != "" {
+        rawUrl = overrideUrl + route
+    }else {
+    	rawUrl = config.BaseUrl() + route
+    }
+
 	method = strings.ToUpper(method)
 
 	req, err := http.NewRequest(method, rawUrl, bytes.NewBuffer(body))
@@ -77,10 +81,16 @@ func GenericRequest(queryParameters map[string]string, body []byte, route string
 	return
 }
 
-func GenericPaginatedRequest(paginator Paginator, queryParameters map[string]string, body []byte, route string, method string) (err error) {
+func GenericPaginatedRequest(paginator Paginator, queryParameters map[string]string, body []byte, route string, method string, overrideUrl string) (err error) {
 	log.Debug("Body is : %s\n", string(body))
 
-	rawUrl := config.BaseUrl() + route
+    var rawUrl string
+    if overrideUrl != "" {
+        rawUrl = overrideUrl + route
+    } else {
+    	rawUrl = config.BaseUrl() + route
+    }
+
 	method = strings.ToUpper(method)
 
 	req, err := http.NewRequest(method, rawUrl, bytes.NewBuffer(body))
@@ -140,7 +150,7 @@ func GenericPaginatedRequest(paginator Paginator, queryParameters map[string]str
 	return
 }
 
-func MultiPartFormRequest(fileDetails []FileUploadDetails, fields map[string]string, route string, method string) (outputBuf []byte, err error) {
+func MultiPartFormRequest(fileDetails []FileUploadDetails, fields map[string]string, route string, method string, overrideUrl string) (outputBuf []byte, err error) {
 	if !isValidHTTPMethod(method) {
 		err = errors.New("Method provided to api.MultiPartFormRequest() is not a valid http method: " + method)
 		return
@@ -190,8 +200,15 @@ func MultiPartFormRequest(fileDetails []FileUploadDetails, fields map[string]str
 		return
 	}
 
+    var rawUrl string
+    if overrideUrl != "" {
+        rawUrl = overrideUrl + route
+    } else {
+    	rawUrl = config.BaseUrl() + route
+    }
+
 	// Setup request, using buf generated for multi part form fields
-	req, err := http.NewRequest(method, config.BaseUrl()+route, buf)
+	req, err := http.NewRequest(method, rawUrl, buf)
 	if err != nil {
 		return
 	}

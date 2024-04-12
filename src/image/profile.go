@@ -13,6 +13,7 @@ type ImageProfile struct {
 	CreateDalle3ImageBody CreateDalle3ImageBody
 	CreateEditBody        map[string]string
 	CreateVariationBody   map[string]string
+    Url                   string
 }
 
 func (ip ImageProfile) Name() string {
@@ -21,6 +22,10 @@ func (ip ImageProfile) Name() string {
 	}
 
 	return ip.ProfileName
+}
+
+func (ip ImageProfile) OverrideUrl() string {
+    return ip.Url
 }
 
 func (ip ImageProfile) SetName(name string) profile.Profile {

@@ -8,8 +8,9 @@ import (
 )
 
 type FineTuningProfile struct {
-	ProfileName           string
+	ProfileName        string
 	CreateFineTuneBody CreateFineTuneBody
+    Url                string
 }
 
 func (p FineTuningProfile) Name() string {
@@ -18,6 +19,10 @@ func (p FineTuningProfile) Name() string {
 	}
 
 	return p.ProfileName
+}
+
+func (p FineTuningProfile) OverrideUrl() string {
+    return p.Url
 }
 
 func (p FineTuningProfile) SetName(name string) profile.Profile {

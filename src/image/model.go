@@ -22,6 +22,8 @@ type CreateImageBody struct {
 	ResponseFormat *string `json:"response_format,omitempty"`
 	Size           *string `json:"size,omitempty"`
 	User           string  `json:"user,omitempty"`
+    Mode           *int    `json:"mode,omitempty"`
+    Step           *int    `json:"step,omitempty"`
 }
 
 type CreateDalle3ImageBody struct {

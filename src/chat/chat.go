@@ -27,7 +27,7 @@ func CreateChatCompletion(prompt []string) (content string, err error) {
 
 	log.Debug("Config is : %s\n", string(bufConfig))
 
-	buf, err := api.GenericRequest(nil, bufConfig, "/v1/chat/completions", "POST")
+	buf, err := api.GenericRequest(nil, bufConfig, "/v1/chat/completions", "POST", chatProfile.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -73,7 +73,7 @@ func CreateVisionChatCompletion(imagePath string, prompt []string) (resp string,
 
 	log.Debug("Config is : %s\n", string(bufConfig))
 
-	buf, err := api.GenericRequest(nil, bufConfig, "/v1/chat/completions", "POST")
+	buf, err := api.GenericRequest(nil, bufConfig, "/v1/chat/completions", "POST", p.OverrideUrl())
 	if err != nil {
 		return
 	}

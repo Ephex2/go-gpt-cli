@@ -46,7 +46,7 @@ func CreateImage(folderPath string, prompt []string) (ImagePaths []string, revis
 	}
 
 	route := BaseImageRoute + createImageRoute
-	buf, err := api.GenericRequest(nil, reqBody, route, "POST")
+	buf, err := api.GenericRequest(nil, reqBody, route, "POST", imageProfile.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func CreateDalle3Image(folderPath string, prompt []string) (ImagePaths []string,
 	}
 
 	route := BaseImageRoute + createImageRoute
-	buf, err := api.GenericRequest(nil, reqBody, route, "POST")
+	buf, err := api.GenericRequest(nil, reqBody, route, "POST", imageProfile.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -160,7 +160,7 @@ func CreateEdit(filePath string, mask *os.File, folderPath string, prompt []stri
 	}
 
 	route := BaseImageRoute + editImageRoute
-	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST", imageProfile.OverrideUrl())
 	if err != nil {
 		return
 	}
@@ -217,7 +217,7 @@ func CreateVariation(filePath string, folderPath string) (imagePaths []string, e
 		},
 	}
 
-	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST")
+	buf, err := api.MultiPartFormRequest(details, fieldMap, route, "POST", imageProfile.OverrideUrl())
 	if err != nil {
 		return
 	}

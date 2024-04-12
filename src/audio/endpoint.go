@@ -25,6 +25,7 @@ func (ae audioEndpoint) DefaultProfile() profile.Profile {
 		CreateTranslationBody:          CreateTranslationBody,
 		CreateVerboseTranslationBody:   CreateVerboseTranslationBody,
 		SaveDirectory:                  "",
+        Url: "",
 	}
 
 	return p

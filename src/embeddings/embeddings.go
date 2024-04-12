@@ -22,7 +22,7 @@ func CreateEmbeddings(input []string) (ceResp CreateEmbeddingResponse, err error
 		return
 	}
 
-	buf, err := api.GenericRequest(nil, bodyBuf, BaseEmbeddingsRoute, "POST")
+	buf, err := api.GenericRequest(nil, bodyBuf, BaseEmbeddingsRoute, "POST", embeddingsP.OverrideUrl())
 	if err != nil {
 		return
 	}

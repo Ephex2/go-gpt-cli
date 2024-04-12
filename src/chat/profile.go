@@ -14,6 +14,7 @@ type ChatProfile struct {
 	CreateCompletionBody       CreateCompletionBody
 	CreateVisionCompletionBody CreateVisionCompletionBody
 	MessageHistory       bool
+    Url                  string
 }
 
 func (c ChatProfile) Name() string {
@@ -22,6 +23,10 @@ func (c ChatProfile) Name() string {
 	}
 
 	return c.ProfileName
+}
+
+func (c ChatProfile) OverrideUrl() string {
+    return c.Url
 }
 
 func (c ChatProfile) SetName(name string) profile.Profile {
