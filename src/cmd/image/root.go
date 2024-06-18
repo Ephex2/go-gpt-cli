@@ -105,9 +105,13 @@ func editFunc(cmd *cobra.Command, args []string) {
 				if t.Extension() == ".png" {
 					mask, err = os.Open(potentialMask)
 					if err != nil {
-						mask = nil
+						log.Critical(err.Error() + "\n")
+                        os.Exit(1)
 					}
-				}
+				} else {
+                    log.Critical("Only .png images are supported by the OpenAI API. The mask provided does not appear to be a .png file.\n")
+                    os.Exit(1)
+                }
 			}
 		}
 	}
