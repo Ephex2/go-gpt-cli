@@ -148,7 +148,7 @@ func statFunc(cmd *cobra.Command, args []string) {
 func validFileCreateArgsFunc(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	if len(args) == 0 {
 		// Not dynamic
-		purposes := []string{file.AllowedFilePurposes.Assistants, file.AllowedFilePurposes.FineTune}
+		purposes := []string{file.AllowedFilePurposes.Assistants, file.AllowedFilePurposes.FineTune, file.AllowedFilePurposes.Batch}
 
 		return purposes, cobra.ShellCompDirectiveNoFileComp
 	}

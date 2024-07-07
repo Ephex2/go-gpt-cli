@@ -5,11 +5,15 @@ var AllowedFilePurposes = struct {
 	AssistantsOutput string
 	FineTune         string
 	FineTuneResults  string
+    Batch string
+    BatchResults string
 }{
 	Assistants:       "assistants",
 	AssistantsOutput: "AssistantsOutput",
 	FineTune:         "fine-tune",
 	FineTuneResults:  "fine-tune-results",
+    Batch: "batch",
+    BatchResults: "batch-results",
 }
 
 var CreateFileBody = map[string]string{

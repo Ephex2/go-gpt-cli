@@ -118,11 +118,11 @@ func (paginator *listBatchesPaginator) Continue(req *http.Request, res *http.Res
 		return
 	}
 
+    nextReq = req
+	nextReq.Header.Set("after", list.LastId)
 	paginator.listBatchesReturn = append(paginator.listBatchesReturn, list)
-	req.Header.Set("after", list.LastId)
 
     more = list.HasMore
-    nextReq = req
 
     return
 }

@@ -19,8 +19,8 @@ func CreateFile(purpose string, filePath string) (resp File, err error) {
 	}
 
 	// Check is not dynamic at the moment
-	if purpose != AllowedFilePurposes.Assistants && purpose != AllowedFilePurposes.FineTune {
-		err = errors.New("purpose for file creation is not currently supported. purpose provided is: " + purpose + "Allowed purposes are: fine-tune, assistants")
+	if purpose != AllowedFilePurposes.Assistants && purpose != AllowedFilePurposes.FineTune && purpose != AllowedFilePurposes.Batch {
+		err = errors.New("purpose for file creation is not currently supported. purpose provided is: " + purpose + "Allowed purposes are: fine-tune, assistants, batch")
 		return
 	}
 
