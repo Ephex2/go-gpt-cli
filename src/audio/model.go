@@ -6,7 +6,7 @@ const (
 	verboseJsonConst verboseJson = "verbose_json"
 )
 
-var AllowedSpeecModels = struct {
+var AllowedSpeechModels = struct {
 	TTS1   string
 	TTS1HD string
 }{
@@ -134,9 +134,9 @@ var CreateVerboseTranslationBody = map[string]string{
 }
 
 type CreateSpeechBody struct {
-	Model          string  `json:"model"`
-	Input          string  `json:"input"`
-	Voice          string  `json:"voice"`
+	Model          string   `json:"model"`
+	Input          string   `json:"input"`
+	Voice          string   `json:"voice"`
 	ResponseFormat *string  `json:"response_format,omitempty"`
 	Speed          *float64 `json:"speed,omitempty"`
 }
@@ -179,11 +179,11 @@ type Segment struct {
 }
 
 func DefaultCreateSpeechBody() CreateSpeechBody {
-    format := new(string)
-    *format = "mp3"
+	format := new(string)
+	*format = "mp3"
 
 	return CreateSpeechBody{
-		Model:          AllowedSpeecModels.TTS1,
+		Model:          AllowedSpeechModels.TTS1,
 		Input:          "",
 		Voice:          AllowedVoices.Nova,
 		ResponseFormat: format,

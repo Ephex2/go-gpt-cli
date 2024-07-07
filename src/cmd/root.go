@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/ephex2/go-gpt-cli/cmd/audio"
+	"github.com/ephex2/go-gpt-cli/cmd/batches"
 	"github.com/ephex2/go-gpt-cli/cmd/chat"
 	"github.com/ephex2/go-gpt-cli/cmd/config"
 	"github.com/ephex2/go-gpt-cli/cmd/embeddings"
@@ -27,6 +28,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() error {
 	rootCmd.AddCommand(audio.AudioCmd)
+	rootCmd.AddCommand(batches.BatchesCmd)
 	rootCmd.AddCommand(chat.ChatCmd)
 	rootCmd.AddCommand(config.ConfigCmd)
 	rootCmd.AddCommand(embeddings.EmbeddingsCmd)
